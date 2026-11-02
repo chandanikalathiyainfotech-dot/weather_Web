@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { FaArrowRight, FaRegSnowflake } from "react-icons/fa6";
 import { useNavigate } from 'react-router-dom';
 import { IoSunnyOutline } from "react-icons/io5";
@@ -10,6 +10,74 @@ function Getstart() {
     function handlenavigate() {
         navigate('/siderbar')
     }
+
+    function getLocation() {
+        return new Promise((resolve, reject) => {
+            if (!navigator.geolocation) {
+                reject(new Error('Geolocation not supported'))
+                return
+            }
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    resolve({
+                        lat: position.coords.latitude,
+                        lon: position.coords.longitude
+                    })
+                },
+                (error) => reject(error),
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            )
+        })
+    }
+
+    async function reverseGeocode(lat, lon) {
+        try {
+            const res = await fetch(
+                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10`
+            )
+            const data = await res.json()
+            const address = data.address
+            return (
+                address?.city ||
+                address?.town ||
+                address?.village ||
+                address?.county ||
+                address?.state ||
+                'Unknown Location'
+            )
+        } catch (err) {
+            console.error('Reverse geocode failed:', err)
+            return null
+        }
+    }
+
+    async function handleGetStart() {
+        try {
+            const location = await getLocation()
+            const city = await reverseGeocode(location.lat, location.lon)
+            const finalCity = city || 'New York'
+            localStorage.setItem('userLocation', JSON.stringify({
+                lat: location.lat,
+                lon: location.lon,
+                city: finalCity,
+                timestamp: Date.now()
+            }))
+            localStorage.setItem('firstRun', 'false')
+            navigate('/siderbar', { state: { searchCity: finalCity } })
+        } catch (err) {
+            console.error('Location error:', err)
+            const saved = localStorage.getItem('userLocation')
+            const fallbackCity = saved ? JSON.parse(saved).city : 'New York'
+            navigate('/siderbar', { state: { searchCity: fallbackCity } })
+        }
+    }
+
+    useEffect(() => {
+        const saved = localStorage.getItem('userLocation');
+        if (!saved) {
+            handleGetStart();
+        }
+    }, [])
 
 
     function AnimatedUmbrella({ className = "" }) {
@@ -155,8 +223,8 @@ function Getstart() {
                         <h1 className='text-5xl xl:text-6xl font-bold mt-10'>Breeze</h1>
                         <p className='text-xl text-white/60 mt-3'>Weather App</p>
 
-                        <button className='bg-secondary p-3 rounded-3xl text-xl mt-18 hidden min-[576px]:block' onClick={handlenavigate}>Get Start</button>
-                        <button className='bg-secondary p-3 h-fit w-fit rounded-3xl text-xl mt-12 mx-auto block min-[576px]:hidden' onClick={handlenavigate}><FaArrowRight /></button>
+                        <button className='bg-secondary p-3 rounded-3xl text-xl mt-18 hidden min-[576px]:block' onClick={handleGetStart}>Get Start</button>
+                        <button className='bg-secondary p-3 h-fit w-fit rounded-3xl text-xl mt-12 mx-auto block min-[576px]:hidden' onClick={handleGetStart}><FaArrowRight /></button>
                     </div>
                 </div>
 

@@ -67,7 +67,7 @@ function CurrentCity({ search, onCangeCity, variant, setSearchvalue, changeselec
             setSelectCity(selcity)
         }
     }, [citysarray])
-    
+    1
     useEffect(() => {
         if (search && search.trim() !== '') {
             console.log("selectcity", "ok")
@@ -447,6 +447,7 @@ function CurrentCity({ search, onCangeCity, variant, setSearchvalue, changeselec
                                 }
 
                                 // Format date
+                                
                                 const date = new Date(v.date + "T12:00:00");
 
                                 const dayName =

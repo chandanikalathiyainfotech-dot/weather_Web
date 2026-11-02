@@ -2,13 +2,12 @@ import React from "react";
 import { FaCloudSunRain, FaMap } from "react-icons/fa6";
 import { TfiMenuAlt } from "react-icons/tfi";
 import { RiListSettingsFill } from "react-icons/ri";
-import { NavLink, Route, Routes } from "react-router-dom";
+import { NavLink, Route, Routes, useLocation } from "react-router-dom";
 import CurrentCity from "../container/CurrentCity";
 import Weather from "../container/Weather";
 import Map from "../container/Map";
 import Setting from "../container/Setting";
 import { useEffect } from "react";
-import { useLocation } from "react-router-dom";
 import { useState, useRef } from "react";
 import { GetCountries, GetAllCities } from "react-country-state-city";
 
@@ -34,6 +33,18 @@ function Siderbar() {
     const justSelectedRef = useRef(false); 
 
     useEffect(() => {
+        const state = location.state
+        if (state?.searchCity) {
+            const cityFromState = state.searchCity
+            const formatted = cityFromState.charAt(0).toUpperCase() + cityFromState.slice(1)
+            setSearch(cityFromState)
+            setCity(cityFromState)
+            setSelectedcity(formatted)
+            handlestorelocal(cityFromState)
+        }
+    }, [location.state]) 
+
+    useEffect(() => {
         setSuggestions([]);
     }, [location.pathname, location.key]);
 
@@ -50,6 +61,7 @@ function Siderbar() {
     }, []);
 
     useEffect(() => {
+        if (pageurl.includes('/currentcity')) { setSuggestions([]); return; }
         if (search.trim() === '') { setSuggestions([]); return; }
         if (justSelectedRef.current) { justSelectedRef.current = false; return; }
         const q = search.toLowerCase();
@@ -92,6 +104,7 @@ function Siderbar() {
     }
 
     function setSearchvalue(city) {
+         justSelectedRef.current = true;
          setSearch(city)
          setSuggestions([])
     }
@@ -141,13 +154,13 @@ function Siderbar() {
                 <form className="relative" ref={searchRef}>
                     <input
                         type="text"
-                        placeholder="Search for cities"
+                        placeholder=""
                         className={`
                         ${pageurl.includes("/siderbar/currentcity")
                                 ? "block"
                                 : "hidden lg:block"
                             }
-                            mb-4 sm:mb-6 shrink-0 text-base sm:text-lg
+                            mb-4 sm:mb-4 shrink-0 text-base sm:text-lg
                             text-white bg-[#202B3B] w-full
                             lg:w-[60%] xl:w-[65%] 2xl:w-[70%]
                             px-3 sm:px-4 py-2 sm:py-3 rounded-xl focus:outline-none
@@ -165,7 +178,7 @@ function Siderbar() {
                                 handlestorelocal(value)
                             }
                         }}
-                    />
+                    />  
                     {suggestions.length > 0 && (
                         <ul className="absolute z-10 bg-[#202B3B] text-white w-full lg:w-[60%] xl:w-[65%] 2xl:w-[70%] rounded-xl mt-1 max-h-60 overflow-auto">
                             {suggestions.map((s, i) => (
@@ -191,7 +204,6 @@ function Siderbar() {
                     <Route path='/maps' element={<Map search={city} />} />
                     <Route path='/setting' element={<Setting search={city} onchangevarint={handleChangeVarinet} variant={variant} />} />
                 </Routes>
-
             </section>
 
             {/* Mobile/Tablet Bottom Menu */}
@@ -205,7 +217,8 @@ function Siderbar() {
                                     to={v.path}
                                     end={v.exact}
                                     className={({ isActive }) =>
-                                        `flex flex-col items-center justify-center flex-1 py-1 transition-all
+                                        `flex flex-
+                                     items-center justify-center flex-1 py-1 transition-all
                                         ${isActive
                                             ? "text-white"
                                             : "text-white/70"

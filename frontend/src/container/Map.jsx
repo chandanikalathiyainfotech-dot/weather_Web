@@ -1,9 +1,7 @@
-
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
     MapContainer,
     TileLayer,
-    Marker,
     useMap,
     Rectangle,
     Tooltip
@@ -35,7 +33,21 @@ const cityIcon = L.divIcon({
 
 const bounds = [
     [39.5, -4.5],
-    [41.0, -2.5],]
+    [41.0, -2.5],
+];
+
+const now = new Date();
+
+const yyyyMMdd = [
+    now.getUTCFullYear(),
+    String(now.getUTCMonth() + 1).padStart(2, "0"),
+    String(now.getUTCDate()).padStart(2, "0"),
+].join("");
+
+const hour = String(now.getUTCHours()).padStart(2, "0");
+
+console.log("UTC Date:", yyyyMMdd);
+console.log("UTC Hour:", hour);
 
 function MapControls() {
     const map = useMap();
@@ -51,31 +63,57 @@ function MapControls() {
     );
 }
 
-const now = new Date();
+function MapView({ center, zoom }) {
+    const map = useMap();
+    useEffect(() => {
+        if (center) {
+            map.setView(center, zoom || 6);
+        }
+    }, [map, center, zoom]);
+    return null;
+}
 
-const yyyyMMdd = [
-    now.getUTCFullYear(),
-    String(now.getUTCMonth() + 1).padStart(2, "0"),
-    String(now.getUTCDate()).padStart(2, "0"),
-].join("");
+function Map({ search }) {
+    const [center, setCenter] = useState([40.2, -3.5]);
 
-const hour = String(now.getUTCHours()).padStart(2, "0");
+    useEffect(() => {
+        if (!search || search.trim() === '') return;
 
-console.log("UTC Date:", yyyyMMdd);
-console.log("UTC Hour:", hour);
+        let cancelled = false;
 
+        async function geocodeCity() {
+            try {
+                const res = await fetch(
+                    `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(search)}&format=json&limit=1`
+                );
+                const data = await res.json();
+                if (!cancelled && data && data.length > 0) {
+                    setCenter([
+                        parseFloat(data[0].lat),
+                        parseFloat(data[0].lon)
+                    ]);
+                }
+            } catch (err) {
+                console.error('Geocode failed:', err);
+            }
+        }
 
-function Map() {
+        geocodeCity();
+        return () => { cancelled = true; };
+    }, [search]);
+
     return (
         <div className="weather-map  w-full h-full">
             <section className="map-section relative flex-1 min-w-0 text-white h-full min-[992px]:h-full">
                 <MapContainer
-                    center={[40.2, -3.5]}
-                    zoom={3}
+                    center={center}
+                    zoom={6}
                     zoomControl={false}
                     scrollWheelZoom
                     className="leaflet-map"
+                    key={center.join(',')}
                 >
+                    <MapView center={center} zoom={6} />
                     <MapControls />
                     <TileLayer
                         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

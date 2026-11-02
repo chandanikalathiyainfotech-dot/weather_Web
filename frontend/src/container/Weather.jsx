@@ -23,6 +23,7 @@ function Weather({ search, variant }) {
     const [windspeed, setWindspeed] = useState('')
     const [pressure, setPressure] = useState('')
     const weatherdata = useSelector(state => state.weather)
+    const isLoading = weatherdata.isLoading
     console.log("city", weatherdata?.data?.location, search)
 
     const current = weatherdata?.data?.current
@@ -140,6 +141,7 @@ function Weather({ search, variant }) {
 
     return (
         <div className="flex flex-col lg:flex-row gap-4 xl:gap-6 2xl:gap-7 w-full">
+            {weatherdata?.data?.current ? (<>
             <div className="w-full lg:w-[60%] xl:w-[65%] 2xl:w-[70%] text-white">
                 {/* madrid */}
                 <div className="flex flex-col sm:flex-row sm:justify-between items-center w-full sm:w-[80%] md:w-[85%] 2xl:w-[70%]  mx-auto mt-6 sm:mt-10 gap-6 sm:gap-0">
@@ -513,7 +515,9 @@ function Weather({ search, variant }) {
                         })}
                     </div>
                 </div>
-            </div>
+                </div>
+            </>)
+            : null}
         </div>
     )
 }
