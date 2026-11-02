@@ -1,0 +1,1 @@
+module.exports.weatherController = require('./weather.js')
