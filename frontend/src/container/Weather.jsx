@@ -120,18 +120,18 @@ function Weather({ search, variant }) {
 
             // Using OpenStreetMap's free reverse geocoding API
             fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`, {
-                headers: { "Accept-Language": "en" },
+                headers: { "Accept-Language": "en", "User-Agent": "WeatherApp/1.0 (contact@example.com)" },
             })
                 .then((res) => res.json())
                 .then((data) => {
                     // Extract city, town, or village from the address object
                     const addr = data.address || {};
-                    const cityName = addr.city || addr.town || addr.village || addr.county || "Unknown City";
+                    const cityName = addr.city || addr.town || addr.village || addr.county || `${latitude},${longitude}`;
                     setCity(cityName);
                 })
                 .catch((err) => {
                     console.error("Error fetching city:", err);
-                    setCity("Error retrieving city name");
+                    setCity(`${latitude},${longitude}`);
                 });
         }
     }, [coords]);

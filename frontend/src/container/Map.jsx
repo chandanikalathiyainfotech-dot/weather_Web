@@ -124,7 +124,6 @@ function Map({ search }) {
                         url={`https://weathermaps.weatherapi.com/tmp2m/tiles/${yyyyMMdd}${hour}/{z}/{x}/{y}.png`}
                         opacity={0.50}
                     />
-
                     <Rectangle
                         bounds={bounds}
                         pathOptions={{

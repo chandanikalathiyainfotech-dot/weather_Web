@@ -24,13 +24,13 @@ function Siderbar() {
     const [search, setSearch] = useState('')
     const [city, setCity] = useState('')
     const [variant, setVarient] = useState({ temp: 'Celsius', windspeed: 'km/h', pressurre: 'Inches', precipitation: 'Millimeters', distance: 'Kilomiters' })
-    const [selectedcity,setSelectedcity] = useState('')    
+    const [selectedcity, setSelectedcity] = useState('')
     const [suggestions, setSuggestions] = useState([])
     const [allItems, setAllItems] = useState([])
     const searchRef = useRef(null)
     const location = useLocation()
-    const pageurl = location.pathname; 
-    const justSelectedRef = useRef(false); 
+    const pageurl = location.pathname;
+    const justSelectedRef = useRef(false);
 
     useEffect(() => {
         const state = location.state
@@ -43,7 +43,7 @@ function Siderbar() {
             setSelectedcity(formatted)
             handlestorelocal(cityFromState)
         }
-    }, [location.state]) 
+    }, [location.state])
 
     useEffect(() => {
         setSuggestions([]);
@@ -68,7 +68,7 @@ function Siderbar() {
         if (search.trim() === '') { setSuggestions([]); return; }
         // Don't show suggestions only if search exactly equals city and it's not user typing fresh
         // But better: show suggestions when user is typing different from current city
-        if (justSelectedRef.current) { 
+        if (justSelectedRef.current) {
             // Reset after a tick so user can type again
             const timer = setTimeout(() => { justSelectedRef.current = false; }, 100);
             return () => clearTimeout(timer);
@@ -89,7 +89,7 @@ function Siderbar() {
     console.log("se", search)
 
     const handlchnageSearch = (city) => {
-        console.log("changecity",city)
+        console.log("changecity", city)
         setSearch(city)
         setCity(city)
         setSuggestions([])
@@ -113,7 +113,7 @@ function Siderbar() {
             localStorage.setItem('city', JSON.stringify(data));
         } else {
             // If exists with different case, normalize it
-            const normalized = citylocal.map((v) => 
+            const normalized = citylocal.map((v) =>
                 typeof v === 'string' && v.toLowerCase() === trimmed.toLowerCase()
                     ? (trimmed.charAt(0).toUpperCase() + trimmed.slice(1).toLowerCase())
                     : v
@@ -123,17 +123,17 @@ function Siderbar() {
     }
 
     function setSearchvalue(city) {
-         justSelectedRef.current = true;
-         setSearch(city)
-         setSuggestions([])
+        justSelectedRef.current = true;
+        setSearch(city)
+        setSuggestions([])
     }
 
     function changeselectedvalue(city) {
-        console.log("selectcity",city)
+        console.log("selectcity", city)
         setSelectedcity(city)
     }
 
-    console.log("selectedcity",selectedcity)
+    console.log("selectedcity", selectedcity)
 
     return (
         <main className="flex flex-col min-[992px]:flex-row min-h-screen h-screen px-3 sm:px-5 min-[992px]:px-6 xl:px-10 pt-4 sm:pt-6 min-[992px]:pt-10 pb-20 min-[992px]:pb-10
@@ -186,34 +186,33 @@ function Siderbar() {
                         `}
                         value={search}
                         onChange={(e) => {
-                        justSelectedRef.current = false;
-                        setSearch(e.target.value);
-                    }}
-                            onKeyDown={(e) => {
-                                if (e.key === "Enter") {
-                                    e.preventDefault();
-                                    const value = search.trim();
-                                    if (value) {
-                                        justSelectedRef.current = true;
-                                        setCity(value);
-                                    }
-                                    setSuggestions([]);
-                                    handlestorelocal(value)
+                            justSelectedRef.current = false;
+                            setSearch(e.target.value);
+                        }}
+                        onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                                e.preventDefault();
+                                const value = search.trim();
+                                if (value) {
+                                    justSelectedRef.current = true;
+                                    setCity(value);
                                 }
-                            }}
-
-                    />  
+                                setSuggestions([]);
+                                handlestorelocal(value)
+                            }
+                        }}
+                    />
                     {suggestions.length > 0 && (
                         <ul className="absolute z-[2000] bg-[#202B3B] text-white w-full lg:w-[60%] xl:w-[65%] 2xl:w-[70%] rounded-xl mt-1 max-h-60 overflow-auto">
                             {suggestions.map((s, i) => (
                                 <li key={i} className="px-3 py-2 hover:bg-white/10 cursor-pointer"
                                     onMouseDown={(e) => e.preventDefault()}
-                                    onClick={() => { 
+                                    onClick={() => {
                                         justSelectedRef.current = true;
-                                        setSearch(s); 
-                                        setCity(s); 
-                                        setSuggestions([]); 
-                                        handlestorelocal(s); 
+                                        setSearch(s);
+                                        setCity(s);
+                                        setSuggestions([]);
+                                        handlestorelocal(s);
                                     }}>
                                     {s}
                                 </li>
@@ -224,7 +223,7 @@ function Siderbar() {
 
                 <Routes>
                     <Route index element={< Weather search={city} variant={variant} />} />
-                    <Route path='/currentcity' element={<CurrentCity search={city} onCangeCity={handlchnageSearch} variant={variant} setSearchvalue={setSearchvalue} changeselectedvalue={changeselectedvalue} selcity={selectedcity}/>} />
+                    <Route path='/currentcity' element={<CurrentCity search={city} onCangeCity={handlchnageSearch} variant={variant} setSearchvalue={setSearchvalue} changeselectedvalue={changeselectedvalue} selcity={selectedcity} />} />
                     <Route path='/maps' element={<Map search={search} />} />
                     <Route path='/setting' element={<Setting search={city} onchangevarint={handleChangeVarinet} variant={variant} />} />
                 </Routes>
