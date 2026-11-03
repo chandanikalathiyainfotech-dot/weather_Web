@@ -103,7 +103,7 @@ function Map({ search }) {
     }, [search]);
 
     return (
-        <div className="weather-map  w-full h-full">
+        <div className="weather-map  w-full h-full -z-10">
             <section className="map-section relative flex-1 min-w-0 text-white h-full min-[992px]:h-full">
                 <MapContainer
                     center={center}
@@ -136,6 +136,12 @@ function Map({ search }) {
                         <Tooltip>Selected region</Tooltip>
                     </Rectangle>
                 </MapContainer>
+                <div className="absolute bottom-4 left-4 bg-black/60 text-white text-xs p-2 rounded z-[1000]">
+                    <div>Blue: Cold</div>
+                    <div>Green: Mild</div>
+                    <div>Yellow: Warm</div>
+                    <div>Red: Hot</div>
+                </div>
             </section>
         </div>
     );

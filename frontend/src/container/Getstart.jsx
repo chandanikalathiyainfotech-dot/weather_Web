@@ -33,7 +33,8 @@ function Getstart() {
     async function reverseGeocode(lat, lon) {
         try {
             const res = await fetch(
-                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10`
+                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10`,
+                { headers: { "Accept-Language": "en" } }
             )
             const data = await res.json()
             const address = data.address
@@ -66,18 +67,25 @@ function Getstart() {
             navigate('/siderbar', { state: { searchCity: finalCity } })
         } catch (err) {
             console.error('Location error:', err)
+            try {
+                const res = await fetch("https://ipwho.is/")
+                const data = await res.json()
+                if (data.success && data.latitude && data.longitude) {
+                    const city = await reverseGeocode(data.latitude, data.longitude)
+                    const finalCity = city || data.city || 'New York'
+                    localStorage.setItem('userLocation', JSON.stringify({ lat: data.latitude, lon: data.longitude, city: finalCity, timestamp: Date.now() }))
+                    localStorage.setItem('firstRun', 'false')
+                    navigate('/siderbar', { state: { searchCity: finalCity } })
+                    return
+                }
+            } catch (e) {}
             const saved = localStorage.getItem('userLocation')
             const fallbackCity = saved ? JSON.parse(saved).city : 'New York'
             navigate('/siderbar', { state: { searchCity: fallbackCity } })
         }
     }
 
-    useEffect(() => {
-        const saved = localStorage.getItem('userLocation');
-        if (!saved) {
-            handleGetStart();
-        }
-    }, [])
+    // navigate only on button click
 
 
     function AnimatedUmbrella({ className = "" }) {

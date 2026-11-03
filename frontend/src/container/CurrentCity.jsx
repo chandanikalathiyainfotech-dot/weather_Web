@@ -413,27 +413,22 @@ function CurrentCity({ search, onCangeCity, variant, setSearchvalue, changeselec
                                         image = "/image/cloud.webp";
                                     }
                                     classname = "weather-icone";
-
                                 } else if (
                                     v?.day?.maxtemp_c >= 30 &&
                                     (condition.includes("sunny") ||
                                         condition.includes("clear"))
                                 ) {
                                     image = "/image/sun.png";
-
                                 } else if (condition.includes("rain")) {
                                     image = "/image/raincloud.webp";
-
                                 } else if (condition.includes("partly cloudy")) {
                                     image = "/image/cloudsun.png";
                                     classname = "suncloud-icone";
-
                                 } else if (
                                     condition.includes("sunny") ||
                                     condition.includes("clear")
                                 ) {
                                     image = "/image/sun.png";
-
                                 } else if (
                                     condition.includes("cloud") ||
                                     condition.includes("haze") ||
@@ -447,7 +442,6 @@ function CurrentCity({ search, onCangeCity, variant, setSearchvalue, changeselec
                                 }
 
                                 // Format date
-                                
                                 const date = new Date(v.date + "T12:00:00");
 
                                 const dayName =

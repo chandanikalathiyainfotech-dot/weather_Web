@@ -37,6 +37,7 @@ function Siderbar() {
         if (state?.searchCity) {
             const cityFromState = state.searchCity
             const formatted = cityFromState.charAt(0).toUpperCase() + cityFromState.slice(1)
+            justSelectedRef.current = true;
             setSearch(cityFromState)
             setCity(cityFromState)
             setSelectedcity(formatted)
@@ -57,13 +58,16 @@ function Siderbar() {
                 ...cities.map((c) => c.name),
             ];
             setAllItems(Array.from(new Set(items)));
+            setSuggestions([]);
+            justSelectedRef.current = false;
         })();
     }, []);
 
     useEffect(() => {
         if (pageurl.includes('/currentcity')) { setSuggestions([]); return; }
         if (search.trim() === '') { setSuggestions([]); return; }
-        if (justSelectedRef.current) { justSelectedRef.current = false; return; }
+        if (search === city) { setSuggestions([]); return; }
+        if (justSelectedRef.current) { setSuggestions([]); return; }
         const q = search.toLowerCase();
         setSuggestions(allItems.filter((n) => n.toLowerCase().includes(q)).slice(0, 10));
     }, [search, allItems]);
@@ -151,7 +155,7 @@ function Siderbar() {
             </div>
 
             <section className={`w-full h-full pb-2 ${pageurl.includes("/siderbar/maps") ? "overflow-auto" : "overflow-auto"} custom-scrollbar`}>
-                <form className="relative" ref={searchRef}>
+                <form className="relative z-[2000]" ref={searchRef}>
                     <input
                         type="text"
                         placeholder=""
@@ -180,7 +184,7 @@ function Siderbar() {
                         }}
                     />  
                     {suggestions.length > 0 && (
-                        <ul className="absolute z-10 bg-[#202B3B] text-white w-full lg:w-[60%] xl:w-[65%] 2xl:w-[70%] rounded-xl mt-1 max-h-60 overflow-auto">
+                        <ul className="absolute z-[2000] bg-[#202B3B] text-white w-full lg:w-[60%] xl:w-[65%] 2xl:w-[70%] rounded-xl mt-1 max-h-60 overflow-auto">
                             {suggestions.map((s, i) => (
                                 <li key={i} className="px-3 py-2 hover:bg-white/10 cursor-pointer"
                                     onMouseDown={(e) => e.preventDefault()}
@@ -201,7 +205,7 @@ function Siderbar() {
                 <Routes>
                     <Route index element={< Weather search={city} variant={variant} />} />
                     <Route path='/currentcity' element={<CurrentCity search={city} onCangeCity={handlchnageSearch} variant={variant} setSearchvalue={setSearchvalue} changeselectedvalue={changeselectedvalue} selcity={selectedcity}/>} />
-                    <Route path='/maps' element={<Map search={city} />} />
+                    <Route path='/maps' element={<Map search={search} />} />
                     <Route path='/setting' element={<Setting search={city} onchangevarint={handleChangeVarinet} variant={variant} />} />
                 </Routes>
             </section>
