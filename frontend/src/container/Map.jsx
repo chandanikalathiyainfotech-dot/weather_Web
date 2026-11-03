@@ -103,7 +103,7 @@ function Map({ search }) {
     }, [search]);
 
     return (
-        <div className="weather-map  w-full h-full -z-10">
+        <div className="weather-map w-full h-full -z-10">
             <section className="map-section relative flex-1 min-w-0 text-white h-full min-[992px]:h-full">
                 <MapContainer
                     center={center}

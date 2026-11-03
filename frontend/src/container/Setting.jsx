@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useEffect } from "react";
+import { subscribeToPush } from "../utils/push";
 
 function Setting({ onchangevarint,variant }) {
 
@@ -8,6 +9,8 @@ function Setting({ onchangevarint,variant }) {
     const [pressurre, setPressure] = useState(variant.pressurre);
     const [precipitation, setPrecipitation] = useState(variant.precipitation)
     const [distance, setDistance] = useState(variant.distance)
+    const [notifStatus, setNotifStatus] = useState('');
+    const [loading, setLoading] = useState(false);
 
     const cities = [
         {
@@ -33,6 +36,19 @@ function Setting({ onchangevarint,variant }) {
     useEffect(() => {
         onchangevarint({temp,windspeed,pressurre,precipitation,distance})
     },[temp,windspeed,pressurre,precipitation,distance])
+
+    const handleEnableNotifications = async () => {
+        setLoading(true);
+        setNotifStatus('');
+        try {
+            const res = await subscribeToPush();
+            setNotifStatus(res.message || 'Notifications enabled successfully');
+        } catch (error) {
+            setNotifStatus(error.message || 'Failed to enable notifications');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <main>
@@ -145,11 +161,24 @@ function Setting({ onchangevarint,variant }) {
                         </div>
 
                     </div>
+
+                    <h2 className="text-[22px] min-[992px]:text-[32px] font-bold text-white mt-8">Notifications</h2>
+                    <div className="bg-[#202B3B] px-4 py-6 rounded-2xl mt-3 min-[992px]:mt-5 lg:ml-6">
+                        <p className="text-white/70 text-sm mb-4">Get alerts for rain, floods, cyclones and important weather updates.</p>
+                        <button
+                            onClick={handleEnableNotifications}
+                            disabled={loading}
+                            className="px-4 py-2 bg-[#4C9BFF] text-white rounded-lg disabled:opacity-50"
+                        >
+                            {loading ? 'Enabling...' : 'Enable Push Notifications'}
+                        </button>
+                        {notifStatus && <p className="text-white/80 text-sm mt-3">{notifStatus}</p>}
+                    </div>
                 </div>
 
             </section>
         </main>
-    )
+    );
 }
 
 export default Setting;

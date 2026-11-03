@@ -28,7 +28,8 @@ function Country() {
     const fetchIpLocation = async () => {
         try {
             const res = await fetch("https://ipwho.is/");
-            const data = await res.json();
+            const data = await res.json();  
+
             if (data.success && data.latitude && data.longitude) {
                 setCoords({
                     latitude: data.latitude,
@@ -56,7 +57,7 @@ function Country() {
         // 2. Once coordinates are available, fetch the city name
         if (coords) {
             const { latitude, longitude } = coords;
-            
+
             // Using OpenStreetMap's free reverse geocoding API
             fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`, {
                 headers: { "Accept-Language": "en" },
@@ -95,39 +96,39 @@ function Country() {
 
     return (
         <>
-        <table>
-            <tbody>
-                <tr>
-                    <td>Latitude</td>
-                    <td>{coords.latitude}</td>
-                </tr>
-                <tr>
-                    <td>Longitude</td>
-                    <td>{coords.longitude}</td>
-                </tr>
-                <tr>
-                    <td>Altitude</td>
-                    <td>{coords.altitude ?? "Not available"}</td>
-                </tr>
-                <tr>
-                    <td>Heading</td>
-                    <td>{coords.heading ?? "Not available"}</td>
-                </tr>
-                <tr>
-                    <td>Speed</td>
-                    <td>{coords.speed ?? "Not available"}</td>
-                </tr>
-            </tbody>
-        </table>
-{error && (
-    <p>
-        Error: {error.message}
-    </p>
-)}
+            <table>
+                <tbody>
+                    <tr>
+                        <td>Latitude</td>
+                        <td>{coords.latitude}</td>
+                    </tr>
+                    <tr>
+                        <td>Longitude</td>
+                        <td>{coords.longitude}</td>
+                    </tr>
+                    <tr>
+                        <td>Altitude</td>
+                        <td>{coords.altitude ?? "Not available"}</td>
+                    </tr>
+                    <tr>
+                        <td>Heading</td>
+                        <td>{coords.heading ?? "Not available"}</td>
+                    </tr>
+                    <tr>
+                        <td>Speed</td>
+                        <td>{coords.speed ?? "Not available"}</td>
+                    </tr>
+                </tbody>
+            </table>
+            {error && (
+                <p>
+                    Error: {error.message}
+                </p>
+            )}
 
-    <div>
-            <h3>Your current city is: <strong>{city}</strong></h3>
-        </div>
+            <div>
+                <h3>Your current city is: <strong>{city}</strong></h3>
+            </div>
         </>
     );
 }

@@ -58,16 +58,14 @@ function Weather({ search, variant }) {
     }, [current, today])
 
     useEffect(() => {
-        if (search) {
-            dispatch(getWeather(search))
-        } else if (city && city !== "Loading location..." && city !== "Error retrieving city name") {
-            dispatch(getWeather(city))
+        if (search && search.trim()) {
+            dispatch(getWeather(search));
+            return;
         }
-    }, [city])
-
-    useEffect(() => {
-        dispatch(getWeather(search))
-    }, [search])
+        if (city && city !== "Loading location..." && city !== "Error retrieving city name" && city !== "Unknown City") {
+            dispatch(getWeather(city));
+        }
+    }, [search, city, dispatch]);
 
     const requestLocation = () => {
         if (!navigator.geolocation) {

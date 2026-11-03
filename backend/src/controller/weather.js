@@ -1,6 +1,9 @@
 
 const axios = require('axios');
 
+const cache = new Map();
+const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
+
 const getWeaterObj = async (req, res) => {
     try {
         const { city } = req.query;
@@ -24,6 +27,17 @@ const getWeaterObj = async (req, res) => {
             });
         }
 
+        const cityKey = city.trim().toLowerCase();
+        const cached = cache.get(cityKey);
+
+        if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+            return res.status(200).json({
+                success: true,
+                data: cached.data,
+                message: 'Weather data retrieved successfully (cached)'
+            });
+        }
+
         const response = await axios.get(
             'https://api.weatherapi.com/v1/forecast.json',
             {
@@ -31,9 +45,15 @@ const getWeaterObj = async (req, res) => {
                     key: apikey,
                     q: city.trim(),
                     days: 7
-                }
+                },
+                timeout: 10000
             }
         );
+
+        cache.set(cityKey, {
+            data: response.data,
+            timestamp: Date.now()
+        });
 
         return res.status(200).json({
             success: true,
@@ -79,10 +99,24 @@ const getmultiplectyWeather = async (req, res) => {
             cities = [cities]
         }
 
-        // const cities = ["London", "Surat", "New York"];
+        const cacheMap = cache;
+        const CACHE_TTL_MULTI = 10 * 60 * 1000;
+        const results = [];
+        const toFetch = [];
 
-        const responses = await Promise.all(
-            cities.map(city =>
+        cities.forEach((city) => {
+            if (!city) return;
+            const key = city.toString().trim().toLowerCase();
+            const cached = cacheMap.get(key);
+            if (cached && Date.now() - cached.timestamp < CACHE_TTL_MULTI) {
+                results.push({ cached: true, data: cached.data, key, city });
+            } else {
+                toFetch.push({ key, city: city.toString().trim() });
+            }
+        });
+
+        const fetched = await Promise.all(
+            toFetch.map(({ key, city }) =>
                 axios.get(
                     "https://api.weatherapi.com/v1/forecast.json",
                     {
@@ -90,15 +124,21 @@ const getmultiplectyWeather = async (req, res) => {
                             key: apikey,
                             q: city,
                             days: 3
-                        }
+                        },
+                        timeout: 10000
                     }
-                )
+                ).then((response) => {
+                    cacheMap.set(key, { data: response.data, timestamp: Date.now() });
+                    return response;
+                }).catch((err) => {
+                    throw err;
+                })
             )
         );
 
-        console.log("responses",responses)
+        const allResponses = [...results.filter(r => r.cached).map(r => ({ data: r.data })), ...fetched];
 
-        const weatherData = responses.map(response => {
+        const weatherData = allResponses.map(response => {
             const data = response.data;
 
             return {

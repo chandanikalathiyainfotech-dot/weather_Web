@@ -66,11 +66,16 @@ function Siderbar() {
     useEffect(() => {
         if (pageurl.includes('/currentcity')) { setSuggestions([]); return; }
         if (search.trim() === '') { setSuggestions([]); return; }
-        if (search === city) { setSuggestions([]); return; }
-        if (justSelectedRef.current) { setSuggestions([]); return; }
+        // Don't show suggestions only if search exactly equals city and it's not user typing fresh
+        // But better: show suggestions when user is typing different from current city
+        if (justSelectedRef.current) { 
+            // Reset after a tick so user can type again
+            const timer = setTimeout(() => { justSelectedRef.current = false; }, 100);
+            return () => clearTimeout(timer);
+        }
         const q = search.toLowerCase();
         setSuggestions(allItems.filter((n) => n.toLowerCase().includes(q)).slice(0, 10));
-    }, [search, allItems]);
+    }, [search, allItems, pageurl]);
 
     useEffect(() => {
         const handler = (e) => {
@@ -102,8 +107,18 @@ function Siderbar() {
         const trimmed = city.trim();
         const check = citylocal.find((v) => typeof v === 'string' && v.toLowerCase() === trimmed.toLowerCase())
         if (!check) {
-            const data = [...citylocal, trimmed];
+            // Store in consistent case - capitalize first letter
+            const formatted = trimmed.charAt(0).toUpperCase() + trimmed.slice(1).toLowerCase();
+            const data = [...citylocal, formatted];
             localStorage.setItem('city', JSON.stringify(data));
+        } else {
+            // If exists with different case, normalize it
+            const normalized = citylocal.map((v) => 
+                typeof v === 'string' && v.toLowerCase() === trimmed.toLowerCase()
+                    ? (trimmed.charAt(0).toUpperCase() + trimmed.slice(1).toLowerCase())
+                    : v
+            );
+            localStorage.setItem('city', JSON.stringify(normalized));
         }
     }
 
@@ -170,18 +185,23 @@ function Siderbar() {
                             px-3 sm:px-4 py-2 sm:py-3 rounded-xl focus:outline-none
                         `}
                         value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                                e.preventDefault();
-                                const value = search.trim();
-                                if (value) {
-                                    setCity(value);
+                        onChange={(e) => {
+                        justSelectedRef.current = false;
+                        setSearch(e.target.value);
+                    }}
+                            onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                    e.preventDefault();
+                                    const value = search.trim();
+                                    if (value) {
+                                        justSelectedRef.current = true;
+                                        setCity(value);
+                                    }
+                                    setSuggestions([]);
+                                    handlestorelocal(value)
                                 }
-                                setSuggestions([]);
-                                handlestorelocal(value)
-                            }
-                        }}
+                            }}
+
                     />  
                     {suggestions.length > 0 && (
                         <ul className="absolute z-[2000] bg-[#202B3B] text-white w-full lg:w-[60%] xl:w-[65%] 2xl:w-[70%] rounded-xl mt-1 max-h-60 overflow-auto">

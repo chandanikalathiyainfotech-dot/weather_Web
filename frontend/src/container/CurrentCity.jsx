@@ -33,10 +33,10 @@ function CurrentCity({ search, onCangeCity, variant, setSearchvalue, changeselec
         setCitysArray(citys);
 
         if (search && search.trim() !== '') {
-            const formatted = search.trim().charAt(0).toUpperCase() + search.trim().slice(1);
+            const formatted = search.trim().charAt(0).toUpperCase() + search.trim().slice(1).toLowerCase();
             setSelectCity(formatted);
         } else if (citys?.length > 0) {
-            const firstCity = citys[0].charAt(0).toUpperCase() + citys[0].slice(1);
+            const firstCity = citys[0].charAt(0).toUpperCase() + citys[0].slice(1).toLowerCase();
             setSelectCity(firstCity);
         } else {
             setSelectCity('');
@@ -71,7 +71,7 @@ function CurrentCity({ search, onCangeCity, variant, setSearchvalue, changeselec
     useEffect(() => {
         if (search && search.trim() !== '') {
             console.log("selectcity", "ok")
-            const formatted = search.trim().charAt(0).toUpperCase() + search.trim().slice(1);
+            const formatted = search.trim().charAt(0).toUpperCase() + search.trim().slice(1).toLowerCase();
             setSelectCity(formatted);
             setSearchvalue(formatted);
             changeselectedvalue(formatted);
