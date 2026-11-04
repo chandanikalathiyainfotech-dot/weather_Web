@@ -33,6 +33,11 @@ export const subscribeToPush = async (apiBaseUrl = 'http://localhost:3000/api/v1
   }
 
   const registration = await registerServiceWorker();
+  // Check if permission is already permanently denied (can't prompt again)
+  if (Notification.permission === 'denied') {
+    throw new Error('PERMISSION_BLOCKED');
+  }
+
   const permission = await Notification.requestPermission();
   console.log('Notification permission:', permission);
   if (permission !== 'granted') {
@@ -61,5 +66,31 @@ export const subscribeToPush = async (apiBaseUrl = 'http://localhost:3000/api/v1
 
   const result = await res.json();
   console.log('Subscribe API result:', result);
+  return result;
+};
+
+export const unsubscribeFromPush = async (apiBaseUrl = 'http://localhost:3000/api/v1') => {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+    throw new Error('Push notifications not supported');
+  }
+
+  const registration = await navigator.serviceWorker.ready;
+  const subscription = await registration.pushManager.getSubscription();
+
+  if (!subscription) {
+    throw new Error('No active subscription found');
+  }
+
+  // Tell the browser to remove the subscription
+  await subscription.unsubscribe();
+
+  // Tell the backend to delete it from the DB
+  const res = await fetch(`${apiBaseUrl}/subscription/unsubscribe`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ endpoint: subscription.endpoint })
+  });
+
+  const result = await res.json();
   return result;
 };

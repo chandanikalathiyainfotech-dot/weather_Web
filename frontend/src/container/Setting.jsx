@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useEffect } from "react";
-import { subscribeToPush } from "../utils/push";
+import { subscribeToPush, unsubscribeFromPush } from "../utils/push";
 
 function Setting({ onchangevarint,variant }) {
 
@@ -11,6 +11,7 @@ function Setting({ onchangevarint,variant }) {
     const [distance, setDistance] = useState(variant.distance)
     const [notifStatus, setNotifStatus] = useState('');
     const [loading, setLoading] = useState(false);
+    const [isSubscribed, setIsSubscribed] = useState(false);
 
     const cities = [
         {
@@ -37,14 +38,55 @@ function Setting({ onchangevarint,variant }) {
         onchangevarint({temp,windspeed,pressurre,precipitation,distance})
     },[temp,windspeed,pressurre,precipitation,distance])
 
+    // On mount, check if the user already has an active push subscription
+    useEffect(() => {
+        const checkExistingSubscription = async () => {
+            if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+            if (Notification.permission !== 'granted') return;
+            try {
+                const registration = await navigator.serviceWorker.ready;
+                const existing = await registration.pushManager.getSubscription();
+                if (existing) {
+                    setIsSubscribed(true);
+                    setNotifStatus({ type: 'success', text: 'You are subscribed to push notifications.' });
+                }
+            } catch (e) {
+                // silently ignore — not subscribed
+            }
+        };
+        checkExistingSubscription();
+    }, []);
+
     const handleEnableNotifications = async () => {
         setLoading(true);
         setNotifStatus('');
         try {
             const res = await subscribeToPush();
-            setNotifStatus(res.message || 'Notifications enabled successfully');
+            setIsSubscribed(true);
+            setNotifStatus({ type: 'success', text: res.message || 'Notifications enabled successfully!' });
         } catch (error) {
-            setNotifStatus(error.message || 'Failed to enable notifications');
+            if (error.message === 'PERMISSION_BLOCKED') {
+                setNotifStatus({
+                    type: 'blocked',
+                    text: 'Notifications are blocked. To enable: click the lock icon in your browser\'s address bar → Notifications → Allow, then try again.'
+                });
+            } else {
+                setNotifStatus({ type: 'error', text: error.message || 'Failed to enable notifications' });
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDisableNotifications = async () => {
+        setLoading(true);
+        setNotifStatus('');
+        try {
+            await unsubscribeFromPush();
+            setIsSubscribed(false);
+            setNotifStatus({ type: 'info', text: 'You have unsubscribed from push notifications.' });
+        } catch (error) {
+            setNotifStatus({ type: 'error', text: error.message || 'Failed to unsubscribe' });
         } finally {
             setLoading(false);
         }
@@ -165,14 +207,39 @@ function Setting({ onchangevarint,variant }) {
                     <h2 className="text-[22px] min-[992px]:text-[32px] font-bold text-white mt-8">Notifications</h2>
                     <div className="bg-[#202B3B] px-4 py-6 rounded-2xl mt-3 min-[992px]:mt-5 lg:ml-6">
                         <p className="text-white/70 text-sm mb-4">Get alerts for rain, floods, cyclones and important weather updates.</p>
-                        <button
-                            onClick={handleEnableNotifications}
-                            disabled={loading}
-                            className="px-4 py-2 bg-[#4C9BFF] text-white rounded-lg disabled:opacity-50"
-                        >
-                            {loading ? 'Enabling...' : 'Enable Push Notifications'}
-                        </button>
-                        {notifStatus && <p className="text-white/80 text-sm mt-3">{notifStatus}</p>}
+                        <div className="flex gap-3 flex-wrap">
+                            <button
+                                onClick={handleEnableNotifications}
+                                disabled={loading || isSubscribed || notifStatus?.type === 'blocked'}
+                                className="px-4 py-2 bg-[#4C9BFF] text-white rounded-lg disabled:opacity-50"
+                            >
+                                {loading && !isSubscribed ? 'Enabling...' : isSubscribed ? '✅ Subscribed' : 'Enable Notifications'}
+                            </button>
+
+                            {isSubscribed && (
+                                <button
+                                    onClick={handleDisableNotifications}
+                                    disabled={loading}
+                                    className="px-4 py-2 bg-red-500/80 text-white rounded-lg disabled:opacity-50"
+                                >
+                                    {loading ? 'Unsubscribing...' : 'Unsubscribe'}
+                                </button>
+                            )}
+                        </div>
+                        {notifStatus && (
+                            <p className={`text-sm mt-3 ${
+                                notifStatus.type === 'success' ? 'text-green-400' :
+                                notifStatus.type === 'info'    ? 'text-blue-400'  :
+                                notifStatus.type === 'blocked' ? 'text-yellow-400' :
+                                'text-red-400'
+                            }`}>
+                                {notifStatus.type === 'blocked' && '⚠️ '}
+                                {notifStatus.type === 'success' && '✅ '}
+                                {notifStatus.type === 'info'    && 'ℹ️ '}
+                                {notifStatus.type === 'error'   && '❌ '}
+                                {notifStatus.text}
+                            </p>
+                        )}
                     </div>
                 </div>
 

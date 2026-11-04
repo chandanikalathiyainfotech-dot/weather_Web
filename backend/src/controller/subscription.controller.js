@@ -125,8 +125,30 @@ const sendNotification = async (req, res) => {
   }
 };
 
+const unsubscribe = async (req, res) => {
+  try {
+    const { endpoint } = req.body;
+    if (!endpoint) {
+      return res.status(400).json({ success: false, message: 'Endpoint is required' });
+    }
+
+    const sub = await PushSubscription.findOne({ endpoint });
+    if (!sub) {
+      return res.status(404).json({ success: false, message: 'Subscription not found' });
+    }
+
+    await PushSubscription.findByIdAndDelete(sub._id);
+
+    return res.status(200).json({ success: true, message: 'Unsubscribed successfully' });
+  } catch (error) {
+    console.error('Unsubscribe error:', error);
+    return res.status(500).json({ success: false, message: 'Failed to unsubscribe' });
+  }
+};
+
 module.exports = {
   saveSubscription,
   getVapidPublicKey,
-  sendNotification
+  sendNotification,
+  unsubscribe
 };

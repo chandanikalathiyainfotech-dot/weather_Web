@@ -53,36 +53,38 @@ function Getstart() {
     }
 
     async function handleGetStart() {
-        try {
-            const location = await getLocation()
-            const city = await reverseGeocode(location.lat, location.lon)
-            const finalCity = city || 'New York'
-            localStorage.setItem('userLocation', JSON.stringify({
-                lat: location.lat,
-                lon: location.lon,
-                city: finalCity,
-                timestamp: Date.now()
-            }))
-            localStorage.setItem('firstRun', 'false')
-            navigate('/siderbar', { state: { searchCity: finalCity } })
-        } catch (err) {
-            console.error('Location error:', err)
+        const saved = localStorage.getItem('userLocation')
+        const initialCity = saved ? JSON.parse(saved).city : 'New York'
+        localStorage.setItem('firstRun', 'false')
+        navigate('/siderbar', { state: { searchCity: initialCity }, replace: true })
+
+        // detect location in background, then update
+        ;(async () => {
             try {
-                const res = await fetch("https://ipwho.is/")
-                const data = await res.json()
-                if (data.success && data.latitude && data.longitude) {
-                    const city = await reverseGeocode(data.latitude, data.longitude)
-                    const finalCity = city || data.city || 'New York'
-                    localStorage.setItem('userLocation', JSON.stringify({ lat: data.latitude, lon: data.longitude, city: finalCity, timestamp: Date.now() }))
-                    localStorage.setItem('firstRun', 'false')
-                    navigate('/siderbar', { state: { searchCity: finalCity } })
-                    return
-                }
-            } catch (e) {}
-            const saved = localStorage.getItem('userLocation')
-            const fallbackCity = saved ? JSON.parse(saved).city : 'New York'
-            navigate('/siderbar', { state: { searchCity: fallbackCity } })
-        }
+                const location = await getLocation()
+                const city = await reverseGeocode(location.lat, location.lon)
+                const finalCity = city || 'New York'
+                localStorage.setItem('userLocation', JSON.stringify({
+                    lat: location.lat,
+                    lon: location.lon,
+                    city: finalCity,
+                    timestamp: Date.now()
+                }))
+                navigate('/siderbar', { state: { searchCity: finalCity }, replace: true })
+            } catch (err) {
+                try {
+                    const res = await fetch("https://ipwho.is/")
+                    const data = await res.json()
+                    if (data.success && data.latitude && data.longitude) {
+                        const city = await reverseGeocode(data.latitude, data.longitude)
+                        const finalCity = city || data.city || 'New York'
+                        localStorage.setItem('userLocation', JSON.stringify({ lat: data.latitude, lon: data.longitude, city: finalCity, timestamp: Date.now() }))
+                        navigate('/siderbar', { state: { searchCity: finalCity }, replace: true })
+                        return
+                    }
+                } catch (e) { }
+            }
+        })()
     }
 
     // navigate only on button click
@@ -99,7 +101,6 @@ function Getstart() {
             { left: "70%", delay: "0.5s", impact: "32%" },
         ];
 
-
         return (
             <div className={`umbrella-wrapper ${className}`}>
                 <img
@@ -110,7 +111,6 @@ function Getstart() {
 
                 {/* Falling rain */}
                 <div className="top-rain">
-
                     {drops.map((drop, i) => (
                         <div
                             key={i}
@@ -147,7 +147,6 @@ function Getstart() {
                             </span>
                         </div>
                     ))}
-
                 </div>
 
                 {/* ADD WATER SPLASH HERE */}

@@ -27,6 +27,7 @@ function Siderbar() {
     const [selectedcity, setSelectedcity] = useState('')
     const [suggestions, setSuggestions] = useState([])
     const [allItems, setAllItems] = useState([])
+    const [inputFocused, setInputFocused] = useState(false)
     const searchRef = useRef(null)
     const location = useLocation()
     const pageurl = location.pathname;
@@ -64,18 +65,13 @@ function Siderbar() {
     }, []);
 
     useEffect(() => {
+        if (!inputFocused) { setSuggestions([]); return; }
         if (pageurl.includes('/currentcity')) { setSuggestions([]); return; }
         if (search.trim() === '') { setSuggestions([]); return; }
-        // Don't show suggestions only if search exactly equals city and it's not user typing fresh
-        // But better: show suggestions when user is typing different from current city
-        if (justSelectedRef.current) {
-            // Reset after a tick so user can type again
-            const timer = setTimeout(() => { justSelectedRef.current = false; }, 100);
-            return () => clearTimeout(timer);
-        }
+        if (justSelectedRef.current) { setSuggestions([]); return; }
         const q = search.toLowerCase();
         setSuggestions(allItems.filter((n) => n.toLowerCase().includes(q)).slice(0, 10));
-    }, [search, allItems, pageurl]);
+    }, [search, allItems, pageurl, inputFocused]);
 
     useEffect(() => {
         const handler = (e) => {
@@ -128,11 +124,11 @@ function Siderbar() {
         setSuggestions([])
     }
 
-    function changeselectedvalue(city) {
+    function changeselectedvalue(city) {       
         console.log("selectcity", city)
-        setSelectedcity(city)
-    }
-
+        setSelectedcity(city)                       
+    }                     
+                           
     console.log("selectedcity", selectedcity)
 
     return (
@@ -152,14 +148,14 @@ function Siderbar() {
                                         `flex items-center mt-6 py-3 rounded-xl transition-all justify-center
                                         ${isActive
                                             ? "text-white"
-                                            : "text-white/70"
-                                        }`
-                                    }
-                                >
+                                            : "text-white/70"                
+                                        }`                               
+                                    }                           
+                                >                                         
                                     <div className="text-center">
                                         <div className="w-fit text-2xl mx-auto">
                                             {v.icone}
-                                        </div>
+                                        </div>                                                                                                     
                                         {v.name}
                                     </div>
                                 </NavLink>
@@ -173,7 +169,7 @@ function Siderbar() {
                 <form className="relative z-[2000]" ref={searchRef}>
                     <input
                         type="text"
-                        placeholder=""
+                        placeholder="search"
                         className={`
                         ${pageurl.includes("/siderbar/currentcity")
                                 ? "block"
@@ -183,8 +179,16 @@ function Siderbar() {
                             text-white bg-[#202B3B] w-full
                             lg:w-[60%] xl:w-[65%] 2xl:w-[70%]
                             px-3 sm:px-4 py-2 sm:py-3 rounded-xl focus:outline-none
-                        `}
+                        `}                 
                         value={search}
+                        onFocus={() => setInputFocused(true)}
+                        onBlur={() => {
+                            // small delay so onClick on suggestion fires first
+                            setTimeout(() => {
+                                setInputFocused(false);
+                                setSuggestions([]);
+                            }, 150);
+                        }}
                         onChange={(e) => {
                             justSelectedRef.current = false;
                             setSearch(e.target.value);
@@ -198,6 +202,7 @@ function Siderbar() {
                                     setCity(value);
                                 }
                                 setSuggestions([]);
+                                setInputFocused(false);
                                 handlestorelocal(value)
                             }
                         }}
@@ -212,6 +217,7 @@ function Siderbar() {
                                         setSearch(s);
                                         setCity(s);
                                         setSuggestions([]);
+                                        setInputFocused(false);
                                         handlestorelocal(s);
                                     }}>
                                     {s}
@@ -248,7 +254,7 @@ function Siderbar() {
                                         }`
                                     }
                                 >
-                                    <div className="text-xl  min-[576px]:text-2xl">
+                                    <div className="text-xl min-[576px]:text-2xl">
                                         {v.icone}
                                     </div>
                                     <span className="text-[12px] mt-1">{v.name}</span>

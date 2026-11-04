@@ -1,5 +1,5 @@
 const express = require('express');
-const { saveSubscription, getVapidPublicKey, sendNotification } = require('../controller/subscription.controller');
+const { saveSubscription, getVapidPublicKey, sendNotification, unsubscribe } = require('../controller/subscription.controller');
 const router = express.Router();
 
 // http://localhost:3000/api/v1/subscription/subscribe
@@ -8,5 +8,7 @@ router.post('/subscribe', saveSubscription);
 router.get('/vapid-public-key', getVapidPublicKey);
 // http://localhost:3000/api/v1/subscription/send
 router.post('/send', sendNotification);
+// http://localhost:3000/api/v1/subscription/unsubscribe
+router.post('/unsubscribe', unsubscribe);
 
 module.exports = router;

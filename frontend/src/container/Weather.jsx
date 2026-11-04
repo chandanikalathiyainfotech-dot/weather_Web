@@ -13,15 +13,11 @@ import { PiGaugeFill } from "react-icons/pi";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 import { getWeather } from "../redux/slice/weather.slice";
-import { useGeolocated } from "react-geolocated";
 
 function Weather({ search, variant }) {
 
     //weather location city one not set city
     const [coords, setCoords] = useState(null);
-    const [error, setError] = useState(null);
-    const [loading, setLoading] = useState(false);
-    const [city, setCity] = useState("Loading location...");
     const [showMore, setShowMore] = useState(false);
     const [windspeed, setWindspeed] = useState('')
     const [pressure, setPressure] = useState('')
@@ -62,97 +58,54 @@ function Weather({ search, variant }) {
             dispatch(getWeather(search));
             return;
         }
-        if (city && city !== "Loading location..." && city !== "Error retrieving city name" && city !== "Unknown City") {
-            dispatch(getWeather(city));
+        // Use coords directly as "lat,lon" — WeatherAPI accepts this format.
+        // No reverse geocoding needed, saves 1–2 seconds.
+        if (coords) {
+            dispatch(getWeather(`${coords.latitude},${coords.longitude}`));
         }
-    }, [search, city, dispatch]);
-
-    const requestLocation = () => {
-        if (!navigator.geolocation) {
-            fetchIpLocation();
-            return;
-        }
-        setLoading(true);
-        setError(null);
-        navigator.geolocation.getCurrentPosition(
-            (pos) => {
-                setCoords(pos.coords);
-                setLoading(false);
-            },
-            () => {
-                fetchIpLocation();
-            },
-            { enableHighAccuracy: false, timeout: 10000 }
-        );
-    };
+    }, [search, coords, dispatch]);
 
     const fetchIpLocation = async () => {
         try {
             const res = await fetch("https://ipwho.is/");
             const data = await res.json();
             if (data.success && data.latitude && data.longitude) {
-                setCoords({
-                    latitude: data.latitude,
-                    longitude: data.longitude,
-                    altitude: null,
-                    heading: null,
-                    speed: null,
+                setCoords(prev => {
+                    // Only update if GPS hasn't already given us coords
+                    if (!prev) {
+                        return { latitude: data.latitude, longitude: data.longitude };
+                    }
+                    return prev;
                 });
-                setError(null);
-            } else {
-                setError({ message: "Unable to determine location." });
             }
         } catch (e) {
-            setError({ message: "Unable to determine location." });
-        } finally {
-            setLoading(false);
+            // IP lookup failed, GPS will handle it
         }
     };
 
+    const requestGpsLocation = () => {
+        if (!navigator.geolocation) return;
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                // GPS is more accurate — always override IP coords
+                setCoords({ latitude: pos.coords.latitude, longitude: pos.coords.longitude });
+                setLoading(false);
+            },
+            () => {
+                // GPS denied/failed — IP location already handled it
+                setLoading(false);
+            },
+            { enableHighAccuracy: false, timeout: 10000 }
+        );
+    };
+
     useEffect(() => {
-        requestLocation();
+        // Step 1: Start IP lookup immediately (fast ~200ms) — shows weather right away
+        fetchIpLocation();
+        // Step 2: Also ask for GPS in parallel (accurate but slow)
+        requestGpsLocation();
     }, []);
 
-    useEffect(() => {
-        // 2. Once coordinates are available, fetch the city name
-        if (coords) {
-            const { latitude, longitude } = coords;
-
-            // Using OpenStreetMap's free reverse geocoding API
-            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`, {
-                headers: { "Accept-Language": "en", "User-Agent": "WeatherApp/1.0 (contact@example.com)" },
-            })
-                .then((res) => res.json())
-                .then((data) => {
-                    // Extract city, town, or village from the address object
-                    const addr = data.address || {};
-                    const cityName = addr.city || addr.town || addr.village || addr.county || `${latitude},${longitude}`;
-                    setCity(cityName);
-                })
-                .catch((err) => {
-                    console.error("Error fetching city:", err);
-                    setCity(`${latitude},${longitude}`);
-                });
-        }
-    }, [coords]);
-
-    if (loading && !coords) {
-        return <div>Getting location data...</div>;
-    }
-
-    if (error && !coords) {
-        return (
-            <div>
-                <h3>Location access is disabled</h3>
-                <p>{error.message || "Please enable location permissions in your browser."}</p>
-                <button onClick={requestLocation}>Retry location</button>
-            </div>
-        );
-    }
-
-    if (!coords) {
-        return <div>Getting location data...</div>;
-    }
     //location end
 
     console.log("props", search, variant)
@@ -265,28 +218,26 @@ function Weather({ search, variant }) {
                                 spaceBetween={10}
                                 breakpoints={{
                                     320: { slidesPerView: 2 },
-                                    375: { slidesPerView: 3 },
+                                    375: { slidesPerView: 3 },                          
                                     480: { slidesPerView: 3 },
-                                    640: { slidesPerView: 4 },
-                                    768: { slidesPerView: 4 },
-                                    1024: { slidesPerView: 5 },
-                                    1280: { slidesPerView: 6 },
-                                    1536: { slidesPerView: 7 }
+                                    640: { slidesPerView: 4 },                             
+                                    768: { slidesPerView: 4 },         
+                                    1024: { slidesPerView: 5 },         
+                                    1280: { slidesPerView: 6 },      
+                                    1536: { slidesPerView: 7 }              
                                 }}
                                 className="w-full px-8 sm:px-10"
                             >
                                 {today?.hour?.map((v, index) => {
-
+                                                                                             
                                     const date = new Date(v.time_epoch * 1000);
-
                                     const time = date.toLocaleTimeString("en-US", {
-                                        hour: "numeric",
-                                        minute: "2-digit",
-                                        hour12: true
+                                        hour: "numeric",                                                
+                                        minute: "2-digit",                                        
+                                        hour12: true                                            
                                     });
-
-                                    console.log(date, time, v);
-
+                                                                               
+                                    console.log(date, time, v);                                                                                
                                     let image;
                                     let classname;
 
@@ -300,22 +251,18 @@ function Weather({ search, variant }) {
                                             image = "/image/cloud.webp";
                                         }
                                         classname = "weather-icone";
-
                                     } else if (
                                         v?.temp_c >= 30 &&
                                         (condition.includes("sunny") || condition.includes("clear"))
                                     ) {
                                         image = "/image/sun.png";
                                         classname = "weather-icone";
-
-                                    } else if (condition.includes("rain")) {
+                                    } else if (condition.includes("rain")) {         
                                         image = "/image/raincloud.webp";
                                         classname = "weather-icone";
-
                                     } else if (condition.includes("partly cloudy")) {
                                         image = "/image/cloudsun.png";
                                         classname = "suncloud-icone";
-
                                     } else if (condition.includes("sunny") || condition.includes("clear") || icon.includes("day")) {
                                         image = "/image/sun.png";
                                         classname = "weather-icone";
@@ -328,7 +275,6 @@ function Weather({ search, variant }) {
                                     ) {
                                         image = "/image/cloud.webp";
                                         classname = "weather-icone";
-
                                     }
                                     console.log(image)
 
@@ -416,16 +362,15 @@ function Weather({ search, variant }) {
                                         {current?.uv}
                                     </h4>
                                 </div>
-                            </div>
-
                         </div>
+                            </div>
                     </div>
 
                     {showMore && (
                         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
                             <div className="w-full max-w-lg bg-[#202B3B] rounded-2xl p-5 sm:p-6 text-white relative">
                                 <button onClick={() => setShowMore(false)} className="absolute top-3 right-4 text-white/70 hover:text-white text-xl">&times;</button>
-                                <p className="uppercase text-white/70 text-xs sm:text-sm mb-4">air condition details</p>
+                                <p className="uppercase text-white/70 text-xs sm:text-sm m b-4">air condition details</p>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-5 gap-x-4">
                                     <div className="flex gap-3">
                                         <FaTemperatureFull className="air-icone" />
@@ -492,7 +437,6 @@ function Weather({ search, variant }) {
                 <div className="w-full lg:w-[40%] xl:w-[35%] 2xl:w-[30%]">
                     <div className="px-4 sm:px-6 md:px-7 py-6 sm:py-9 bg-[#202B3B] rounded-2xl mt-4 lg:mt-6 sm:mt-10">
                         <p className="uppercase text-white/70 text-xs sm:text-sm">7-days forecast</p>
-
                         <div className="mt-4">
                             {forecast?.map((v, index) => {
                                 let image;
@@ -511,31 +455,31 @@ function Weather({ search, variant }) {
                                     } else {
                                         image = "/image/cloud.webp";
                                     }
-                                    classname = "weather-icone";
-                                } else if (
+                                    classname = "weather-icone";      
+                                } else if (           
                                     v?.day?.maxtemp_c >= 30 &&
-                                    (condition.includes("sunny") ||
-                                        condition.includes("clear"))
-                                ) {
-                                    image = "/image/sun.png";
+                                    (condition.includes("sunny") ||       
+                                        condition.includes("clear"))                 
+                                ) {        
+                                    image = "/image/sun.png";        
                                 } else if (condition.includes("rain")) {
                                     image = "/image/raincloud.webp";
-                                } else if (condition.includes("partly cloudy")) {
-                                    image = "/image/cloudsun.png";
-                                    classname = "suncloud-icone";
+                                } else if (condition.includes("partly cloudy")) {        
+                                    image = "/image/cloudsun.png";          
+                                    classname = "suncloud-icone";           
                                 } else if (
                                     condition.includes("sunny") ||
-                                    condition.includes("clear")
+                                    condition.includes("clear")             
                                 ) {
                                     image = "/image/sun.png";
-                                } else if (
+                                } else if (                     
                                     condition.includes("cloud") ||
                                     condition.includes("haze") ||
                                     condition.includes("smoky") ||
                                     condition.includes("mist") ||
                                     condition.includes("fog")
                                 ) {
-                                    image = "/image/cloud.webp";
+                                    image = "/image/cloud.webp";                                
                                 } else {
                                     image = "/image/cloud.webp";
                                 }
@@ -547,7 +491,7 @@ function Weather({ search, variant }) {
                                     index === 0
                                         ? "Today"
                                         : date.toLocaleDateString("en-US", {
-                                            weekday: "short",
+                                            weekday: "short",                                                                                                              
                                         });
 
                                 console.log("today", v)
@@ -572,20 +516,21 @@ function Weather({ search, variant }) {
                                             />
 
                                             <p className="forcastname text-xs sm:text-sm">
-                                                {v?.day?.condition?.text || "Unknown"}
+                                                {v?.day?.condition?.text || "Unknown"}                                                                          
                                             </p>
                                         </div>
+
 
                                         <div className="col-span-4 text-right sm:col-start-10">
                                             <span className="forcastname">
                                                 {Math.round(variant?.temp === 'Celsius' ? v?.day?.mintemp_c : v?.day?.mintemp_f)}°
                                             </span>
-                                            {" / "}
+                                            {" / "}                                                         
                                             {Math.round(variant?.temp === 'Celsius' ? v?.day?.maxtemp_c : v?.day?.maxtemp_f)}°
-                                        </div>
+                                        </div>                             
                                     </div>
-                                );
-                            })}
+                                );                          
+                            })}           
                         </div>
                     </div>
                 </div>
@@ -595,4 +540,4 @@ function Weather({ search, variant }) {
     )
 }
 
-export default Weather
+export default Weather                                                                                                                                                     

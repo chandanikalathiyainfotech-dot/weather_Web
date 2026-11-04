@@ -43,7 +43,7 @@ function Country() {
                 setError({ message: "Unable to determine location." });
             }
         } catch (e) {
-            setError({ message: "Unable to determine location." });
+            setError({ message: "Unable to determine location." });  
         } finally {
             setLoading(false);
         }
