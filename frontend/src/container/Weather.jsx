@@ -218,26 +218,26 @@ function Weather({ search, variant }) {
                                 spaceBetween={10}
                                 breakpoints={{
                                     320: { slidesPerView: 2 },
-                                    375: { slidesPerView: 3 },                          
+                                    375: { slidesPerView: 3 },
                                     480: { slidesPerView: 3 },
-                                    640: { slidesPerView: 4 },                             
-                                    768: { slidesPerView: 4 },         
-                                    1024: { slidesPerView: 5 },         
-                                    1280: { slidesPerView: 6 },      
-                                    1536: { slidesPerView: 7 }              
+                                    640: { slidesPerView: 4 },
+                                    768: { slidesPerView: 4 },
+                                    1024: { slidesPerView: 5 },
+                                    1280: { slidesPerView: 6 },
+                                    1536: { slidesPerView: 7 }
                                 }}
                                 className="w-full px-8 sm:px-10"
                             >
                                 {today?.hour?.map((v, index) => {
-                                                                                             
+
                                     const date = new Date(v.time_epoch * 1000);
                                     const time = date.toLocaleTimeString("en-US", {
-                                        hour: "numeric",                                                
-                                        minute: "2-digit",                                        
-                                        hour12: true                                            
+                                        hour: "numeric",
+                                        minute: "2-digit",
+                                        hour12: true
                                     });
-                                                                               
-                                    console.log(date, time, v);                                                                                
+
+                                    console.log(date, time, v);
                                     let image;
                                     let classname;
 
@@ -257,7 +257,7 @@ function Weather({ search, variant }) {
                                     ) {
                                         image = "/image/sun.png";
                                         classname = "weather-icone";
-                                    } else if (condition.includes("rain")) {         
+                                    } else if (condition.includes("rain")) {
                                         image = "/image/raincloud.webp";
                                         classname = "weather-icone";
                                     } else if (condition.includes("partly cloudy")) {
@@ -362,8 +362,8 @@ function Weather({ search, variant }) {
                                         {current?.uv}
                                     </h4>
                                 </div>
-                        </div>
                             </div>
+                        </div>
                     </div>
 
                     {showMore && (
@@ -455,31 +455,31 @@ function Weather({ search, variant }) {
                                     } else {
                                         image = "/image/cloud.webp";
                                     }
-                                    classname = "weather-icone";      
-                                } else if (           
-                                    v?.day?.maxtemp_c >= 30 &&
-                                    (condition.includes("sunny") ||       
-                                        condition.includes("clear"))                 
-                                ) {        
-                                    image = "/image/sun.png";        
-                                } else if (condition.includes("rain")) {
-                                    image = "/image/raincloud.webp";
-                                } else if (condition.includes("partly cloudy")) {        
-                                    image = "/image/cloudsun.png";          
-                                    classname = "suncloud-icone";           
+                                    classname = "weather-icone";
                                 } else if (
-                                    condition.includes("sunny") ||
-                                    condition.includes("clear")             
+                                    v?.day?.maxtemp_c >= 30 &&
+                                    (condition.includes("sunny") ||
+                                        condition.includes("clear"))
                                 ) {
                                     image = "/image/sun.png";
-                                } else if (                     
+                                } else if (condition.includes("rain")) {
+                                    image = "/image/raincloud.webp";
+                                } else if (condition.includes("partly cloudy")) {
+                                    image = "/image/cloudsun.png";
+                                    classname = "suncloud-icone";
+                                } else if (
+                                    condition.includes("sunny") ||
+                                    condition.includes("clear")
+                                ) {
+                                    image = "/image/sun.png";
+                                } else if (
                                     condition.includes("cloud") ||
                                     condition.includes("haze") ||
                                     condition.includes("smoky") ||
                                     condition.includes("mist") ||
                                     condition.includes("fog")
                                 ) {
-                                    image = "/image/cloud.webp";                                
+                                    image = "/image/cloud.webp";
                                 } else {
                                     image = "/image/cloud.webp";
                                 }
@@ -491,7 +491,7 @@ function Weather({ search, variant }) {
                                     index === 0
                                         ? "Today"
                                         : date.toLocaleDateString("en-US", {
-                                            weekday: "short",                                                                                                              
+                                            weekday: "short",
                                         });
 
                                 console.log("today", v)
@@ -516,21 +516,20 @@ function Weather({ search, variant }) {
                                             />
 
                                             <p className="forcastname text-xs sm:text-sm">
-                                                {v?.day?.condition?.text || "Unknown"}                                                                          
+                                                {v?.day?.condition?.text || "Unknown"}
                                             </p>
                                         </div>
-
 
                                         <div className="col-span-4 text-right sm:col-start-10">
                                             <span className="forcastname">
                                                 {Math.round(variant?.temp === 'Celsius' ? v?.day?.mintemp_c : v?.day?.mintemp_f)}°
                                             </span>
-                                            {" / "}                                                         
+                                            {" / "}
                                             {Math.round(variant?.temp === 'Celsius' ? v?.day?.maxtemp_c : v?.day?.maxtemp_f)}°
-                                        </div>                             
+                                        </div>
                                     </div>
-                                );                          
-                            })}           
+                                );
+                            })}
                         </div>
                     </div>
                 </div>

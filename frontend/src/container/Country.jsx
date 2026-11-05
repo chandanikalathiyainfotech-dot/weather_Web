@@ -1,135 +1,46 @@
 import React, { useState, useEffect } from "react";
+import { MdOutlineWebAsset } from "react-icons/md";
+import { PiWebcamFill } from "react-icons/pi";
 
 function Country() {
-    const [coords, setCoords] = useState(null);
-    const [error, setError] = useState(null);
-    const [loading, setLoading] = useState(false);
-    const [city, setCity] = useState("Loading location...");
-
-    const requestLocation = () => {
-        if (!navigator.geolocation) {
-            fetchIpLocation();
-            return;
-        }
-        setLoading(true);
-        setError(null);
-        navigator.geolocation.getCurrentPosition(
-            (pos) => {
-                setCoords(pos.coords);
-                setLoading(false);
-            },
-            () => {
-                fetchIpLocation();
-            },
-            { enableHighAccuracy: false, timeout: 10000 }
-        );
-    };
-
-    const fetchIpLocation = async () => {
-        try {
-            const res = await fetch("https://ipwho.is/");
-            const data = await res.json();  
-
-            if (data.success && data.latitude && data.longitude) {
-                setCoords({
-                    latitude: data.latitude,
-                    longitude: data.longitude,
-                    altitude: null,
-                    heading: null,
-                    speed: null,
-                });
-                setError(null);
-            } else {
-                setError({ message: "Unable to determine location." });
-            }
-        } catch (e) {
-            setError({ message: "Unable to determine location." });  
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        requestLocation();
-    }, []);
-
-    useEffect(() => {
-        // 2. Once coordinates are available, fetch the city name
-        if (coords) {
-            const { latitude, longitude } = coords;
-
-            // Using OpenStreetMap's free reverse geocoding API
-            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`, {
-                headers: { "Accept-Language": "en" },
-            })
-                .then((res) => res.json())
-                .then((data) => {
-                    // Extract city, town, or village from the address object
-                    const addr = data.address || {};
-                    const cityName = addr.city || addr.town || addr.village || addr.county || "Unknown City";
-                    setCity(cityName);
-                })
-                .catch((err) => {
-                    console.error("Error fetching city:", err);
-                    setCity("Error retrieving city name");
-                });
-        }
-    }, [coords]);
-
-    if (loading && !coords) {
-        return <div>Getting location data...</div>;
-    }
-
-    if (error && !coords) {
-        return (
-            <div>
-                <h3>Location access is disabled</h3>
-                <p>{error.message || "Please enable location permissions in your browser."}</p>
-                <button onClick={requestLocation}>Retry location</button>
-            </div>
-        );
-    }
-
-    if (!coords) {
-        return <div>Getting location data...</div>;
-    }
 
     return (
-        <>
-            <table>
-                <tbody>
-                    <tr>
-                        <td>Latitude</td>
-                        <td>{coords.latitude}</td>
-                    </tr>
-                    <tr>
-                        <td>Longitude</td>
-                        <td>{coords.longitude}</td>
-                    </tr>
-                    <tr>
-                        <td>Altitude</td>
-                        <td>{coords.altitude ?? "Not available"}</td>
-                    </tr>
-                    <tr>
-                        <td>Heading</td>
-                        <td>{coords.heading ?? "Not available"}</td>
-                    </tr>
-                    <tr>
-                        <td>Speed</td>
-                        <td>{coords.speed ?? "Not available"}</td>
-                    </tr>
-                </tbody>
-            </table>
-            {error && (
-                <p>
-                    Error: {error.message}
-                </p>
-            )}
-
-            <div>
-                <h3>Your current city is: <strong>{city}</strong></h3>
+        <div style={{ padding: '40px' }}>
+            <div className="grid grid-cols-12 mt-10 ml-20">
+                <div className="col-span-2">
+                    <div className="servicebox">
+                        <div className="icone">
+                            <span><PiWebcamFill /></span>
+                        </div>
+                        <div className="infobox">
+                            <div className="titile">
+                                Web Designing
+                            </div>
+                            <div className="text">
+                                <h3>1963</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </>
+
+            <div className="shape">
+                <svg viewBox="0 0 450 420">
+                    <path
+                        className="outer-ring"
+                        d="
+                            M 190 20
+                            C 90 -5, 5 65, 15 125
+                            C 20 175, 85 225, 115 290
+                            C 155 390, 230 420, 320 375
+                            C 400 335, 465 250, 420 190
+                            C 370 130, 280 90, 190 20
+                            Z
+                        "
+                    />
+                </svg>
+            </div>
+        </div>
     );
 }
 

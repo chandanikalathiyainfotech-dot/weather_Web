@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+html, body, #root {
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
 
 @theme {
   --color-primary: #4F8CFF;
@@ -455,7 +461,7 @@
 
 .map-section {
   min-height: 0;
-  overflow: hidden;
+  overflow: visible;
   position: relative;
 }
 
@@ -601,11 +607,11 @@
 
 .map-controls button:first-child {
   border-radius: 12px 12px 0 0;
-  border-bottom:solid rgba(255, 255, 255, 0.459) 1px;
+  border-bottom: solid rgba(255, 255, 255, 0.459) 1px;
 }
 
-.map-controls button:nth-child(2)  {
-  border-radius:0 0 12px 12px ;
+.map-controls button:nth-child(2) {
+  border-radius: 0 0 12px 12px;
 }
 
 .map-controls button:last-child {
@@ -632,34 +638,57 @@
     padding: 10px;
     border-radius: 18px;
   }
+
   .weather-card h2 {
     font-size: 16px;
     margin: 0 0 6px;
   }
+
   .weather-icon {
     font-size: 28px;
     margin: 4px 0;
   }
+
   .weather-card p {
     font-size: 18px;
     margin: 4px 0 0;
   }
-  .bilbao { top: 6%; left: 20%; }
-  .madrid { top: 44%; left: 10%; }
-  .barcelona { top: 28%; right: 8%; }
-  .malaga { bottom: 4%; left: 32%; }
+
+  .bilbao {
+    top: 6%;
+    left: 20%;
+  }
+
+  .madrid {
+    top: 44%;
+    left: 10%;
+  }
+
+  .barcelona {
+    top: 28%;
+    right: 8%;
+  }
+
+  .malaga {
+    bottom: 4%;
+    left: 32%;
+  }
+
   .weather-map {
     padding: 10px;
   }
+
   .map-controls {
     right: 6px;
     bottom: 16px;
   }
+
   .map-controls button {
     width: 38px;
     height: 38px;
     font-size: 24px;
   }
+
   .weather-card button {
     margin-top: 8px;
     padding: 8px;
@@ -674,25 +703,107 @@
     padding: 8px;
     border-radius: 16px;
   }
+
   .weather-card h2 {
     font-size: 14px;
     margin: 0 0 4px;
   }
+
   .weather-icon {
     font-size: 24px;
     margin: 2px 0;
   }
+
   .weather-card p {
     font-size: 16px;
     margin: 2px 0 0;
   }
-  .bilbao { top: 5%; left: 18%; }
-  .madrid { top: 42%; left: 8%; }
-  .barcelona { top: 26%; right: 6%; }
-  .malaga { bottom: 3%; left: 30%; }
+
+  .bilbao {
+    top: 5%;
+    left: 18%;
+  }
+
+  .madrid {
+    top: 42%;
+    left: 8%;
+  }
+
+  .barcelona {
+    top: 26%;
+    right: 6%;
+  }
+
+  .malaga {
+    bottom: 3%;
+    left: 30%;
+  }
+
   .weather-card button {
     margin-top: 6px;
     padding: 6px;
     font-size: 10px;
   }
+}
+
+.servicebox {
+  background-color: #6f1b1b;
+  padding: 20px;
+  padding-top: 50px;
+  position: relative;
+}
+
+.infobox {
+  background-color: #fff;
+  color: #6f1b1b;
+  border-radius: 20px;
+  padding: 50px 30px;
+  text-align: center;
+}
+
+.titile {
+  font-size: 25px;
+  font-weight: 600;
+}
+
+.text {
+  font-size: 30px;
+  font-weight: 600;
+}
+
+.icone {
+  background-color: #6f1b1b;
+  color: #fff;
+  border: 7px solid #fff;
+  border-radius: 30px 0 30px 0;
+  padding: 13px 18px;
+  font-size: 30px;
+  position: absolute;
+  top: 10%;
+  left: 50%;
+  transform: translate(-50%, 0);
+}
+
+
+.shape {
+  width: 450px;
+  height: 420px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #6f1b1b;
+}
+
+.shape svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.outer-ring {
+  fill: none;
+  stroke: #5f2929;
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
