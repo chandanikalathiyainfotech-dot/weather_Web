@@ -213,35 +213,27 @@ function CurrentCity({ search, onCangeCity, variant, setSearchvalue, changeselec
 
                         console.log("selectcity", selectCity === v.city, selectCity, selcity)
 
-                        return (
+        return (
                             <div
                                 key={v.city}
-                                className={`flex pl-5 pr-8 py-3 rounded-2xl items-center justify-between mt-4 ${selectCity?.toLowerCase() === v.city?.toLowerCase()
+                                className={`flex px-3 sm:px-5 py-3 rounded-2xl items-center justify-between mt-3 sm:mt-4 cursor-pointer transition-all ${selectCity?.toLowerCase() === v.city?.toLowerCase()
                                     ? 'bg-transparent border-[#0461A5] border-2'
-                                    : 'bg-[#202B3B]'
+                                    : 'bg-[#202B3B] hover:bg-[#2a3a52]'
                                     }`}
                                 onClick={() => setvaluefun(v.city)}
                             >
-                                <div className="flex items-center gap-3">
-                                    <img
-                                        src={image}
-                                        className={`${classname} mx-auto mt-1 sm:mt-2`}
-                                    />
+                                <div className="flex items-center gap-2 sm:gap-3">
+                                    <img src={image} className={`${classname} shrink-0`} alt={v.condition} />
                                     <div>
-                                        <h3 className="text-2xl font-bold">{v.city}</h3>
-                                        <p className="text-white/70 text-lg">{v.time}</p>
+                                        <h3 className="text-lg sm:text-2xl font-bold">{v.city}</h3>
+                                        <p className="text-white/70 text-sm sm:text-lg">{v.time}</p>
                                     </div>
                                 </div>
-                                {/* 
-                            <h3 className="relative w-fit text-4xl font-bold text-white/70">
-                                {v.temp}
-                                <RxDot className="absolute -right-6 -top-1 text-md stroke-[0.5]" />
-                            </h3> */}
                                 <div className="flex items-start text-white/70">
-                                    <h3 className="w-fit text-4xl font-bold ">
+                                    <h3 className="w-fit text-2xl sm:text-4xl font-bold">
                                         {Math.round(variant?.temp === 'Celsius' ? v?.temperaturec : v?.temperaturef)}
                                     </h3>
-                                    <span className="ml-1 text-xl sm:text-2xl font-semibold">°{variant?.temp === 'Celsius' ? 'C' : 'F'}</span>
+                                    <span className="ml-1 text-base sm:text-xl font-semibold mt-1">°{variant?.temp === 'Celsius' ? 'C' : 'F'}</span>
                                 </div>
                             </div>
                         )
@@ -249,33 +241,30 @@ function CurrentCity({ search, onCangeCity, variant, setSearchvalue, changeselec
                 </div>
 
                 <div className="w-full lg:w-[40%] xl:w-[35%] 2xl:w-[25%] text-white">
-                    <div className="flex flex-col sm:flex-row sm:justify-between items-center w-full gap-6 sm:gap-0 border-b-1 px-4 pb-8">
+                    <div className="flex flex-col sm:flex-row sm:justify-between items-center w-full gap-4 sm:gap-0 border-b border-white/20 px-3 sm:px-4 pb-6 sm:pb-8">
                         <div className="py-2 text-center sm:text-left">
-                            <h2 className="text-[28px] sm:text-[34px] font-bold">{location?.name}</h2>
-                            <p className="text-white/70 mt-1">Chance of rain:  {current?.chance_of_rain + '%'} </p>
-
-                            <div className="items-start mt-6 sm:mt-12 hidden sm:flex">
-                                <h1 className="text-4xl sm:text-5xl 2xl:text-6xl font-bold hidden sm:block">
+                            <h2 className="text-[22px] sm:text-[28px] lg:text-[22px] xl:text-[28px] font-bold">{location?.name}</h2>
+                            <p className="text-white/70 mt-1 text-sm sm:text-base">Chance of rain: {current?.chance_of_rain ?? '--'}%</p>
+                            <div className="items-start mt-4 sm:mt-8 hidden sm:flex">
+                                <h1 className="text-4xl sm:text-5xl font-bold">
                                     {Math.round(variant?.temp === 'Celsius' ? current?.temp_c : current?.temp_f)}
                                 </h1>
-                                <span className="ml-1 text-xl sm:text-2xl font-semibold">°{variant?.temp === 'Celsius' ? 'C' : 'F'}</span>
+                                <span className="ml-1 text-xl sm:text-2xl font-semibold mt-1">°{variant?.temp === 'Celsius' ? 'C' : 'F'}</span>
                             </div>
                         </div>
-
                         <div>
-                            <img src='../../public/image/sun.png' className="w-[120px] h-[120px] " />
+                            <img src='/image/sun.png' className="w-[100px] h-[100px] sm:w-[120px] sm:h-[120px]" alt="weather" />
                         </div>
-
-                        <div className="flex items-start mt-6 sm:mt-12 flex sm:hidden ">
-                            <h1 className="text-4xl sm:text-5xl 2xl:text-6xl font-bold hidden sm:block">
+                        <div className="flex items-start sm:hidden">
+                            <h1 className="text-4xl font-bold">
                                 {Math.round(variant?.temp === 'Celsius' ? current?.temp_c : current?.temp_f)}
                             </h1>
-                            <span className="ml-1 text-xl sm:text-2xl font-semibold">°{variant?.temp === 'Celsius' ? 'C' : 'F'}</span>
+                            <span className="ml-1 text-xl font-semibold mt-1">°{variant?.temp === 'Celsius' ? 'C' : 'F'}</span>
                         </div>
                     </div>
 
                     {/* forecast */}
-                    <div className="py-12 border-b-1 relative">
+                    <div className="py-6 sm:py-10 border-b border-white/20 relative">
                         <p className="uppercase text-white/70 text-xs sm:text-sm">today's forecast</p>
 
                         <div className="w-full mx-auto flex mt-4 sm:mt-5 relative">
@@ -397,90 +386,45 @@ function CurrentCity({ search, onCangeCity, variant, setSearchvalue, changeselec
                         <div className="mt-2">
                             {forecast?.slice(0, 3)?.map((v, index) => {
                                 let image;
-                                let classname = "weather-icone";
+                                let classname = "daysforcast-icone";
 
-                                const condition =
-                                    v?.day?.condition?.text?.toLowerCase() || "";
+                                const condition = v?.day?.condition?.text?.toLowerCase() || "";
+                                const icon = v?.day?.condition?.icon?.toLowerCase() || "";
 
-                                const icon =
-                                    v?.day?.condition?.icon?.toLowerCase() || "";
-
-                                // Set weather image according to condition
                                 if (icon.includes("/night/")) {
-                                    if (condition.includes("clear")) {
-                                        image = "/image/cloudmoon.webp";
-                                    } else {
-                                        image = "/image/cloud.webp";
-                                    }
-                                    classname = "weather-icone";
-                                } else if (
-                                    v?.day?.maxtemp_c >= 30 &&
-                                    (condition.includes("sunny") ||
-                                        condition.includes("clear"))
-                                ) {
+                                    image = condition.includes("clear") ? "/image/cloudmoon.webp" : "/image/cloud.webp";
+                                } else if (v?.day?.maxtemp_c >= 30 && (condition.includes("sunny") || condition.includes("clear"))) {
                                     image = "/image/sun.png";
                                 } else if (condition.includes("rain")) {
                                     image = "/image/raincloud.webp";
                                 } else if (condition.includes("partly cloudy")) {
-                                    image = "/image/cloudsun.png";
-                                    classname = "suncloud-icone";
-                                } else if (
-                                    condition.includes("sunny") ||
-                                    condition.includes("clear")
-                                ) {
+                                    image = "/image/cloudsun.png"; classname = "suncloud-icone";
+                                } else if (condition.includes("sunny") || condition.includes("clear")) {
                                     image = "/image/sun.png";
-                                } else if (
-                                    condition.includes("cloud") ||
-                                    condition.includes("haze") ||
-                                    condition.includes("smoky") ||
-                                    condition.includes("mist") ||
-                                    condition.includes("fog")
-                                ) {
-                                    image = "/image/cloud.webp";
                                 } else {
                                     image = "/image/cloud.webp";
                                 }
 
-                                // Format date
                                 const date = new Date(v.date + "T12:00:00");
-
-                                const dayName =
-                                    index === 0
-                                        ? "Today"
-                                        : date.toLocaleDateString("en-US", {
-                                            weekday: "short",
-                                        });
+                                const dayName = index === 0 ? "Today" : date.toLocaleDateString("en-US", { weekday: "short" });
 
                                 return (
-                                    <div
-                                        key={v.date}
-                                        className={`grid grid-cols-12 items-center text-white/70 py-3 ${index !== forecast.length - 1
-                                            ? "border-b border-white/30"
-                                            : ""
-                                            }`}
+                                    <div key={v.date}
+                                        className={`grid grid-cols-12 items-center text-white/70 py-2 sm:py-3 ${index !== 2 ? "border-b border-white/20" : ""}`}
                                     >
-                                        <h4 className="col-span-3 sm:col-span-4 text-sm sm:text-base">
-                                            {dayName}
-                                        </h4>
-
-                                        <div className="col-span-5 sm:col-span-4 flex gap-1 items-center">
-                                            <img
-                                                src={image}
-                                                alt={v?.day?.condition?.text || "Weather"}
-                                                className={classname}
-                                            />
-
-                                            <p className="forcastname text-xs sm:text-sm">
-                                                {v?.day?.condition?.text || "Unknown"}
-                                            </p>
+                                        <h4 className="col-span-3 text-xs sm:text-sm">{dayName}</h4>
+                                        <div className="col-span-5 flex gap-1 items-center min-w-0">
+                                            <img src={image} alt={v?.day?.condition?.text} className={`${classname} shrink-0`} />
+                                            <p className="forcastname text-[10px] sm:text-xs truncate">{v?.day?.condition?.text}</p>
                                         </div>
-
-                                        <div className="col-span-4 text-right sm:col-start-10">
-                                            <span className="forcastname">
+                                        <div className="col-span-4 text-right text-xs sm:text-sm">
+                                            <span className="text-white/40">
                                                 {Math.round(variant?.temp === 'Celsius' ? v?.day?.mintemp_c : v?.day?.mintemp_f)}°
                                             </span>
                                             {" / "}
-                                            {Math.round(variant?.temp === 'Celsius' ? v?.day?.mintemp_c : v?.day?.mintemp_f)}°
+                                            <span className="text-white font-semibold">
+                                                {Math.round(variant?.temp === 'Celsius' ? v?.day?.maxtemp_c : v?.day?.maxtemp_f)}°
+                                            </span>
                                         </div>
                                     </div>
                                 );

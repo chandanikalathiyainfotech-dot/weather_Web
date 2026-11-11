@@ -171,7 +171,7 @@ function Siderbar() {
                         type="text"
                         placeholder="search"
                         className={`
-                        ${pageurl.includes("/siderbar/currentcity") || pageurl.includes("/siderbar/maps")
+                        ${pageurl.includes("/siderbar/currentcity")
                                 ? "block"
                                 : "hidden lg:block"
                             }
@@ -230,7 +230,7 @@ function Siderbar() {
                 </form>
 
                 <Routes>
-                    <Route index element={< Weather search={city} variant={variant} />} />
+                    <Route index element={<Weather search={city || selectedcity} variant={variant} />} />
                     <Route path='/currentcity' element={<CurrentCity search={city} onCangeCity={handlchnageSearch} variant={variant} setSearchvalue={setSearchvalue} changeselectedvalue={changeselectedvalue} selcity={selectedcity} />} />
                     <Route path='/maps' element={<Map search={selectedcity || city} variant={variant} />} />
                     <Route path='/setting' element={<Setting search={city} onchangevarint={handleChangeVarinet} variant={variant} />} />
@@ -256,17 +256,16 @@ function Siderbar() {
                                         }`
                                     }
                                 >
-                                    <div className="text-xl min-[576px]:text-2xl">
+                                    <div className="text-2xl min-[576px]:text-2xl">
                                         {v.icone}
                                     </div>
-                                    <span className="text-[12px] mt-1">{v.name}</span>
+                                    {/* <span className="text-[12px] mt-1">{v.name}</span> */}
                                 </NavLink>
                             )
                         })
                     }
                 </div>
             </nav>
-
         </main>
     )
 }

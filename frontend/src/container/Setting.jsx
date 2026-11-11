@@ -93,146 +93,117 @@ function Setting({ onchangevarint,variant }) {
     };
 
     return (
-        <main>
+        <main className="pb-6">
+            <h2 className="text-[26px] sm:text-[30px] font-bold text-white min-[992px]:hidden mb-4">Settings</h2>
 
-            <h2 className="text-[30px] sm:text-[32px] font-bold text-white min-[992px]:hidden">Settings</h2>
+            <section className="flex py-2 sm:py-6">
+                <div id="setting" className="w-full xl:w-[75%] 2xl:w-[65%]">
 
-            <section className="flex py-6">
-                <div id="setting" className="w-full 2xl:w-[70%] ">
-                    <h2 className="text-[22px] min-[992px]:text-[32px] font-bold text-white">Units</h2>
+                    <h2 className="text-[20px] min-[992px]:text-[28px] font-bold text-white">Units</h2>
 
-                    <div className="bg-[#202B3B] px-4 py-6 rounded-2xl mt-3 min-[992px]:mt-5 lg:ml-6">
+                    <div className="bg-[#202B3B] px-3 sm:px-5 py-5 sm:py-6 rounded-2xl mt-3 min-[992px]:mt-5 min-[992px]:ml-6">
+
+                        {/* Temperature */}
                         <div>
-                            <h2 className="text-[16px] sm:text-[17px] font-bold text-white/70 uppercase">temperature</h2>
-
-                            <ul className="grid grid-cols-12">
-                                <li
-                                    onClick={() => setTemp('Celsius')}
-                                    className={`col-span-6  ${variant.temp === 'Celsius' ? "bg-[#35455E] text-white" : ""}`}>
-                                    Celsius
-                                </li>
-                                <li
-                                    onClick={() => setTemp('Fahrenhit')}
-                                    className={`col-span-6  ${variant.temp === 'Fahrenhit' ? "bg-[#35455E] text-white" : ""}`}>
-                                    Fahrenhit
-                                </li>
+                            <h2 className="text-xs sm:text-sm font-bold text-white/70 uppercase tracking-wider mb-3">Temperature</h2>
+                            <ul className="grid grid-cols-2 gap-2">
+                                {['Celsius','Fahrenhit'].map(opt => (
+                                    <li key={opt} onClick={() => setTemp(opt)}
+                                        className={`text-center py-2 rounded-xl text-sm sm:text-base cursor-pointer transition-colors
+                                            ${variant.temp === opt ? 'bg-[#35455E] text-white' : 'text-white/50 hover:text-white'}`}>
+                                        {opt}
+                                    </li>
+                                ))}
                             </ul>
                         </div>
 
-                        <div className="my-8">
-                            <h2 className="text-[16px] sm:text-[17px] font-bold text-white/70 uppercase">wind speed</h2>
-
-                            <ul className="grid grid-cols-12">
-                                <li
-                                    onClick={() => setWindspeed('km/h')}
-                                    className={`col-span-4 ${variant.windspeed === 'km/h' && "bg-[#35455E] text-white"} `}>
-                                    km/h
-                                </li>
-                                <li
-                                    onClick={() => setWindspeed('m/s')}
-                                    className={`col-span-4 ${variant.windspeed === 'm/s' && "bg-[#35455E] text-white"}`}>
-                                    m/s
-                                </li>
-                                <li
-                                    onClick={() => setWindspeed('knots')}
-                                    className={`col-span-4 ${variant.windspeed === 'knots' && "bg-[#35455E] text-white"}`}>
-                                    knots
-                                </li>
+                        {/* Wind Speed */}
+                        <div className="mt-6">
+                            <h2 className="text-xs sm:text-sm font-bold text-white/70 uppercase tracking-wider mb-3">Wind Speed</h2>
+                            <ul className="grid grid-cols-3 gap-2">
+                                {['km/h','m/s','knots'].map(opt => (
+                                    <li key={opt} onClick={() => setWindspeed(opt)}
+                                        className={`text-center py-2 rounded-xl text-sm sm:text-base cursor-pointer transition-colors
+                                            ${variant.windspeed === opt ? 'bg-[#35455E] text-white' : 'text-white/50 hover:text-white'}`}>
+                                        {opt}
+                                    </li>
+                                ))}
                             </ul>
                         </div>
 
-                        <div className="my-8">
-                            <h2 className="text-[16px] sm:text-[17px] font-bold text-white/70 uppercase">pressure</h2>
-
-                            <ul className="grid grid-cols-12">
-                                <li
-                                    onClick={() => setPressure('hPa')}
-                                    className={`col-span-3 ${variant.pressurre === 'hPa' && "bg-[#35455E] text-white"}`}>
-                                    hPa
-                                </li>
-                                <li
-                                    onClick={() => setPressure('Inches')}
-                                    className={`col-span-3 ${variant.pressurre === 'Inches' && 'bg-[#35455E] text-white'}`}>
-                                    Inches
-                                </li>
-                                <li
-                                    onClick={() => setPressure('kPa')}
-                                    className={`col-span-3 ${variant.pressurre === 'kPa' && 'bg-[#35455E] text-white'}`}>
-                                    kPa
-                                </li>
-                                <li
-                                    onClick={() => setPressure('mm')}
-                                    className={`col-span-3 ${variant.pressurre === 'mm' && 'bg-[#35455E] text-white'}`}>
-                                    mm
-                                </li>
+                        {/* Pressure */}
+                        <div className="mt-6">
+                            <h2 className="text-xs sm:text-sm font-bold text-white/70 uppercase tracking-wider mb-3">Pressure</h2>
+                            <ul className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                                {['hPa','Inches','kPa','mm'].map(opt => (
+                                    <li key={opt} onClick={() => setPressure(opt)}
+                                        className={`text-center py-2 rounded-xl text-sm sm:text-base cursor-pointer transition-colors
+                                            ${variant.pressurre === opt ? 'bg-[#35455E] text-white' : 'text-white/50 hover:text-white'}`}>
+                                        {opt}
+                                    </li>
+                                ))}
                             </ul>
                         </div>
 
-                        <div className="my-8">
-                            <h2 className="text-[16px] sm:text-[17px] font-bold text-white/70 uppercase">precipitation</h2>
-
-                            <ul className="grid grid-cols-12">
-                                <li
-                                    onClick={() => setPrecipitation('Millimeters')}
-                                    className={`col-span-6 ${variant.precipitation === "Millimeters" && "bg-[#35455E] text-white"}`}>
-                                    Millimeters
-                                </li>
-                                <li
-                                    onClick={() => setPrecipitation('Inches')}
-                                    className={`col-span-6 ${variant.precipitation === 'Inches' && "bg-[#35455E] text-white"}`}>
-                                    Inches
-                                </li>
+                        {/* Precipitation */}
+                        <div className="mt-6">
+                            <h2 className="text-xs sm:text-sm font-bold text-white/70 uppercase tracking-wider mb-3">Precipitation</h2>
+                            <ul className="grid grid-cols-2 gap-2">
+                                {['Millimeters','Inches'].map(opt => (
+                                    <li key={opt} onClick={() => setPrecipitation(opt)}
+                                        className={`text-center py-2 rounded-xl text-sm sm:text-base cursor-pointer transition-colors
+                                            ${variant.precipitation === opt ? 'bg-[#35455E] text-white' : 'text-white/50 hover:text-white'}`}>
+                                        {opt}
+                                    </li>
+                                ))}
                             </ul>
                         </div>
 
-                        <div>
-                            <h2 className="text-[16px] sm:text-[17px] font-bold text-white/70 uppercase">distance</h2>
-
-                            <ul className="grid grid-cols-12">
-                                <li
-                                    onClick={() => setDistance('Kilomiters')}
-                                    className={`col-span-6 ${variant.distance === 'Kilomiters' && 'bg-[#35455E] text-white'}`}>
-                                    Kilomiters
-                                </li>
-                                <li
-                                    onClick={() => setDistance('miles')}
-                                    className={`col-span-6 ${variant.distance === 'miles' && 'bg-[#35455E] text-white'}`}>
-                                    miles
-                                </li>
+                        {/* Distance */}
+                        <div className="mt-6">
+                            <h2 className="text-xs sm:text-sm font-bold text-white/70 uppercase tracking-wider mb-3">Distance</h2>
+                            <ul className="grid grid-cols-2 gap-2">
+                                {['Kilomiters','miles'].map(opt => (
+                                    <li key={opt} onClick={() => setDistance(opt)}
+                                        className={`text-center py-2 rounded-xl text-sm sm:text-base cursor-pointer transition-colors
+                                            ${variant.distance === opt ? 'bg-[#35455E] text-white' : 'text-white/50 hover:text-white'}`}>
+                                        {opt}
+                                    </li>
+                                ))}
                             </ul>
                         </div>
-
                     </div>
 
-                    <h2 className="text-[22px] min-[992px]:text-[32px] font-bold text-white mt-8">Notifications</h2>
-                    <div className="bg-[#202B3B] px-4 py-6 rounded-2xl mt-3 min-[992px]:mt-5 lg:ml-6">
-                        <p className="text-white/70 text-sm mb-4">Get alerts for rain, floods, cyclones and important weather updates.</p>
+                    {/* Notifications */}
+                    <h2 className="text-[20px] min-[992px]:text-[28px] font-bold text-white mt-8">Notifications</h2>
+                    <div className="bg-[#202B3B] px-3 sm:px-5 py-5 sm:py-6 rounded-2xl mt-3 min-[992px]:mt-5 min-[992px]:ml-6">
+                        <p className="text-white/70 text-xs sm:text-sm mb-4">
+                            Get alerts for rain, floods, cyclones and important weather updates.
+                        </p>
                         <div className="flex gap-3 flex-wrap">
                             <button
                                 onClick={handleEnableNotifications}
                                 disabled={loading || isSubscribed || notifStatus?.type === 'blocked'}
-                                className="px-4 py-2 bg-[#4C9BFF] text-white rounded-lg disabled:opacity-50"
+                                className="px-4 py-2 bg-[#4C9BFF] text-white text-sm sm:text-base rounded-xl disabled:opacity-50 transition-opacity"
                             >
                                 {loading && !isSubscribed ? 'Enabling...' : isSubscribed ? '✅ Subscribed' : 'Enable Notifications'}
                             </button>
-
                             {isSubscribed && (
                                 <button
                                     onClick={handleDisableNotifications}
                                     disabled={loading}
-                                    className="px-4 py-2 bg-red-500/80 text-white rounded-lg disabled:opacity-50"
+                                    className="px-4 py-2 bg-red-500/80 text-white text-sm sm:text-base rounded-xl disabled:opacity-50 transition-opacity"
                                 >
                                     {loading ? 'Unsubscribing...' : 'Unsubscribe'}
                                 </button>
                             )}
                         </div>
                         {notifStatus && (
-                            <p className={`text-sm mt-3 ${
+                            <p className={`text-xs sm:text-sm mt-3 ${
                                 notifStatus.type === 'success' ? 'text-green-400' :
                                 notifStatus.type === 'info'    ? 'text-blue-400'  :
                                 notifStatus.type === 'blocked' ? 'text-yellow-400' :
-                                'text-red-400'
-                            }`}>
+                                'text-red-400'}`}>
                                 {notifStatus.type === 'blocked' && '⚠️ '}
                                 {notifStatus.type === 'success' && '✅ '}
                                 {notifStatus.type === 'info'    && 'ℹ️ '}
@@ -241,8 +212,8 @@ function Setting({ onchangevarint,variant }) {
                             </p>
                         )}
                     </div>
-                </div>
 
+                </div>
             </section>
         </main>
     );

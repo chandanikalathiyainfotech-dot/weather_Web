@@ -55,56 +55,54 @@ function Weather({ search, variant }) {
 
     useEffect(() => {
         if (search && search.trim()) {
+            // search bar ya selected city — isko priority hai
             dispatch(getWeather(search));
             return;
         }
-        // Use coords directly as "lat,lon" — WeatherAPI accepts this format.
-        // No reverse geocoding needed, saves 1–2 seconds.
+        // koi city select nahi — location se fetch karo
         if (coords) {
             dispatch(getWeather(`${coords.latitude},${coords.longitude}`));
         }
     }, [search, coords, dispatch]);
 
     const fetchIpLocation = async () => {
+        // sirf tab run karo jab search empty ho
+        if (search && search.trim()) return;
         try {
             const res = await fetch("https://ipwho.is/");
             const data = await res.json();
             if (data.success && data.latitude && data.longitude) {
                 setCoords(prev => {
-                    // Only update if GPS hasn't already given us coords
-                    if (!prev) {
-                        return { latitude: data.latitude, longitude: data.longitude };
-                    }
+                    if (!prev) return { latitude: data.latitude, longitude: data.longitude };
                     return prev;
                 });
             }
-        } catch (e) {
-            // IP lookup failed, GPS will handle it
-        }
+        } catch (e) {}
     };
 
     const requestGpsLocation = () => {
+        // sirf tab run karo jab search empty ho
+        if (search && search.trim()) return;
         if (!navigator.geolocation) return;
         navigator.geolocation.getCurrentPosition(
             (pos) => {
-                // GPS is more accurate — always override IP coords
                 setCoords({ latitude: pos.coords.latitude, longitude: pos.coords.longitude });
-                setLoading(false);
             },
-            () => {
-                // GPS denied/failed — IP location already handled it
-                setLoading(false);
-            },
+            () => {},
             { enableHighAccuracy: false, timeout: 10000 }
         );
     };
 
     useEffect(() => {
-        // Step 1: Start IP lookup immediately (fast ~200ms) — shows weather right away
-        fetchIpLocation();
-        // Step 2: Also ask for GPS in parallel (accurate but slow)
-        requestGpsLocation();
-    }, []);
+        // pehli baar mount pe — agar search nahi hai toh location fetch karo
+        if (!search || !search.trim()) {
+            fetchIpLocation();
+            requestGpsLocation();
+        }
+    }, []); // only on mount
+
+    // agar search baad mein aa jaaye (city select/search) toh location calls ruk jaayein
+    // useEffect([search]) handles dispatch already above
 
     //location end
 
@@ -191,10 +189,10 @@ function Weather({ search, variant }) {
                         </div>
 
                         <div className="flex items-start mt-6 sm:mt-12  sm:hidden ">
-                            <h1 className="text-4xl sm:text-5xl 2xl:text-6xl font-bold hidden sm:block">
+                            <h1 className="text-4xl font-bold">
                                 {Math.round(variant?.temp === 'Celsius' ? current?.temp_c : current?.temp_f)}
                             </h1>
-                            <span className="ml-1 text-xl sm:text-2xl font-semibold">°{variant?.temp === 'Celsius' ? 'C' : 'F'}</span>
+                            <span className="ml-1 text-xl font-semibold mt-1">°{variant?.temp === 'Celsius' ? 'C' : 'F'}</span>
                         </div>
                     </div>
 
@@ -229,7 +227,6 @@ function Weather({ search, variant }) {
                                 className="w-full px-8 sm:px-10"
                             >
                                 {today?.hour?.map((v, index) => {
-
                                     const date = new Date(v.time_epoch * 1000);
                                     const time = date.toLocaleTimeString("en-US", {
                                         hour: "numeric",
@@ -334,7 +331,6 @@ function Weather({ search, variant }) {
                                 <FaWind className="air-icone" />
                                 <div className="text-air">
                                     <p className="airtext-top">Wind</p>
-
                                     <h4 className="relative w-fit text-[24px] sm:text-[30px] font-bold text-white/70 -mt-1">
                                         {/* { Math.round(windspeed)  + variant?.windspeed} */}
                                         {Math.round(windspeed * 100) / 100 + variant?.windspeed}
@@ -447,7 +443,6 @@ function Weather({ search, variant }) {
 
                                 const icon =
                                     v?.day?.condition?.icon?.toLowerCase() || "";
-
                                 // Set weather image according to condition
                                 if (icon.includes("/night/")) {
                                     if (condition.includes("clear")) {
