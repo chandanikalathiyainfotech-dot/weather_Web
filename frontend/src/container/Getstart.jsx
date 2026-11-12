@@ -106,9 +106,9 @@ function Getstart() {
         )
     }
 
-    const month = new Date().getMonth() + 1
+    const month = new Date().getMonth() + 1;
 
-    let mainimgpart, smallimgpart
+    let mainimgpart, smallimgpart;
 
     if (month >= 12 || month <= 2) {
         mainimgpart = <SnowAnimation />
@@ -152,7 +152,7 @@ function Getstart() {
                         Real-time weather forecasts, air quality, and alerts — all in one place.
                     </p>
 
-                    {/* Desktop button */}
+                    {/*  button */}
                     <button
                         className="hidden sm:flex items-center gap-2 bg-secondary text-white px-8 py-3 rounded-3xl 
                         text-lg font-semibold mt-10 hover:opacity-90 transition-opacity"
@@ -175,4 +175,4 @@ function Getstart() {
     )
 }
 
-export default Getstart
+export default Getstart;

@@ -8,6 +8,7 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getmultiplectyWeather, getWeather } from "../redux/slice/weather.slice";
 import { useState } from "react";
+import { getWeatherImage } from "../utils/weatherImage";
 
 function CurrentCity({ search, onCangeCity, variant, setSearchvalue, changeselectedvalue, selcity }) {
 
@@ -172,44 +173,9 @@ function CurrentCity({ search, onCangeCity, variant, setSearchvalue, changeselec
                         let image;
                         let classname;
 
-                        const condition = v?.condition?.toLowerCase() || "";
-                        console.log("condition", condition)
-
-                        if (condition.includes("/night/")) {
-                            if (condition.includes("clear")) {
-                                image = "/image/cloudmoon.webp";
-                            } else {
-                                image = "/image/cloud.webp";
-                            }
-                            classname = "weather-icone";
-                        } else if (
-                            v?.temp_c >= 30 &&
-                            (condition.includes("sunny") || condition.includes("clear"))
-                        ) {
-                            image = "/image/sun.png";
-                            classname = "weather-icone";
-                        } else if (condition.includes("rain")) {
-                            image = "/image/raincloud.webp";
-                            classname = "weather-icone";
-                        } else if (condition.includes("partly cloudy")) {
-                            image = "/image/cloudsun.png";
-                            classname = "suncloud-icone";
-                        } else if (condition.includes("sunny") || condition.includes("clear")) {
-                            image = "/image/sun.png";
-                            classname = "weather-icone";
-                        } else if (
-                            condition.includes("cloud") ||
-                            condition.includes("haze") ||
-                            condition.includes("smoky") ||
-                            condition.includes("mist") ||
-                            condition.includes("fog")
-                        ) {
-                            image = "/image/cloud.webp";
-                            classname = "weather-icone";
-                        } else if (condition.includes("overcast")) {
-                            image = "/image/cloud.webp";
-                            classname = "weather-icone";
-                        }
+                        const condition = v?.condition || "";
+                        const { image: img, classname: cls } = getWeatherImage(condition, '', true);
+                        image = img; classname = cls;
 
                         console.log("selectcity", selectCity === v.city, selectCity, selcity)
 
@@ -307,45 +273,10 @@ function CurrentCity({ search, onCangeCity, variant, setSearchvalue, changeselec
 
                                     console.log(date, time, v);
 
-                                    let image;
-                                    let classname;
-
-                                    const condition = v?.condition?.text?.toLowerCase() || "";
-                                    const icon = v?.condition?.icon?.toLowerCase() || "";
-
-                                    if (icon.includes("/night/")) {
-                                        if (condition.includes("clear")) {
-                                            image = "/image/cloudmoon.webp";
-                                        } else {
-                                            image = "/image/cloud.webp";
-                                        }
-                                        classname = "weather-icone";
-                                    } else if (
-                                        v?.temp_c >= 30 &&
-                                        (condition.includes("sunny") || condition.includes("clear"))
-                                    ) {
-                                        image = "/image/sun.png";
-                                        classname = "weather-icone";
-                                    } else if (condition.includes("rain")) {
-                                        image = "/image/raincloud.webp";
-                                        classname = "weather-icone";
-                                    } else if (condition.includes("partly cloudy")) {
-                                        image = "/image/cloudsun.png";
-                                        classname = "suncloud-icone";
-                                    } else if (condition.includes("sunny") || condition.includes("clear") || icon.includes("day")) {
-                                        image = "/image/sun.png";
-                                        classname = "weather-icone";
-                                    } else if (
-                                        condition.includes("cloud") ||
-                                        condition.includes("haze") ||
-                                        condition.includes("smoky") ||
-                                        condition.includes("mist") ||
-                                        condition.includes("fog")
-                                    ) {
-                                        image = "/image/cloud.webp";
-                                        classname = "weather-icone";
-                                    }
-                                    console.log(image)
+                                    const condition = v?.condition?.text || "";
+                                    const icon = v?.condition?.icon || "";
+                                    const isDay = v?.is_day !== undefined ? v.is_day === 1 : !icon.toLowerCase().includes('/night/');
+                                    const { image, classname } = getWeatherImage(condition, icon, isDay);
 
                                     return (
                                         <SwiperSlide key={index} className="relative flex items-center justify-center">
@@ -388,22 +319,9 @@ function CurrentCity({ search, onCangeCity, variant, setSearchvalue, changeselec
                                 let image;
                                 let classname = "daysforcast-icone";
 
-                                const condition = v?.day?.condition?.text?.toLowerCase() || "";
-                                const icon = v?.day?.condition?.icon?.toLowerCase() || "";
-
-                                if (icon.includes("/night/")) {
-                                    image = condition.includes("clear") ? "/image/cloudmoon.webp" : "/image/cloud.webp";
-                                } else if (v?.day?.maxtemp_c >= 30 && (condition.includes("sunny") || condition.includes("clear"))) {
-                                    image = "/image/sun.png";
-                                } else if (condition.includes("rain")) {
-                                    image = "/image/raincloud.webp";
-                                } else if (condition.includes("partly cloudy")) {
-                                    image = "/image/cloudsun.png"; classname = "suncloud-icone";
-                                } else if (condition.includes("sunny") || condition.includes("clear")) {
-                                    image = "/image/sun.png";
-                                } else {
-                                    image = "/image/cloud.webp";
-                                }
+                                const condition = v?.day?.condition?.text || "";
+                                const icon = v?.day?.condition?.icon || "";
+                                ({ image, classname } = getWeatherImage(condition, icon, true));
 
                                 const date = new Date(v.date + "T12:00:00");
                                 const dayName = index === 0 ? "Today" : date.toLocaleDateString("en-US", { weekday: "short" });

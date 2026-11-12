@@ -13,6 +13,7 @@ import { PiGaugeFill } from "react-icons/pi";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 import { getWeather } from "../redux/slice/weather.slice";
+import { getWeatherImage } from "../utils/weatherImage";
 
 function Weather({ search, variant }) {
 
@@ -77,7 +78,7 @@ function Weather({ search, variant }) {
                     return prev;
                 });
             }
-        } catch (e) {}
+        } catch (e) { }
     };
 
     const requestGpsLocation = () => {
@@ -88,7 +89,7 @@ function Weather({ search, variant }) {
             (pos) => {
                 setCoords({ latitude: pos.coords.latitude, longitude: pos.coords.longitude });
             },
-            () => {},
+            () => { },
             { enableHighAccuracy: false, timeout: 10000 }
         );
     };
@@ -238,42 +239,10 @@ function Weather({ search, variant }) {
                                     let image;
                                     let classname;
 
-                                    const condition = v?.condition?.text?.toLowerCase() || "";
-                                    const icon = v?.condition?.icon?.toLowerCase() || "";
-
-                                    if (icon.includes("/night/")) {
-                                        if (condition.includes("clear")) {
-                                            image = "/image/cloudmoon.webp";
-                                        } else {
-                                            image = "/image/cloud.webp";
-                                        }
-                                        classname = "weather-icone";
-                                    } else if (
-                                        v?.temp_c >= 30 &&
-                                        (condition.includes("sunny") || condition.includes("clear"))
-                                    ) {
-                                        image = "/image/sun.png";
-                                        classname = "weather-icone";
-                                    } else if (condition.includes("rain")) {
-                                        image = "/image/raincloud.webp";
-                                        classname = "weather-icone";
-                                    } else if (condition.includes("partly cloudy")) {
-                                        image = "/image/cloudsun.png";
-                                        classname = "suncloud-icone";
-                                    } else if (condition.includes("sunny") || condition.includes("clear") || icon.includes("day")) {
-                                        image = "/image/sun.png";
-                                        classname = "weather-icone";
-                                    } else if (
-                                        condition.includes("cloud") ||
-                                        condition.includes("haze") ||
-                                        condition.includes("smoky") ||
-                                        condition.includes("mist") ||
-                                        condition.includes("fog")
-                                    ) {
-                                        image = "/image/cloud.webp";
-                                        classname = "weather-icone";
-                                    }
-                                    console.log(image)
+                                    const condition = v?.condition?.text || "";
+                                    const icon = v?.condition?.icon || "";
+                                    const isDay = v?.is_day !== undefined ? v.is_day === 1 : !icon.toLowerCase().includes('/night/');
+                                    ({ image, classname } = getWeatherImage(condition, icon, isDay));
 
                                     return (<SwiperSlide key={index} className="relative flex items-center justify-center">
                                         <div className="relative flex items-center justify-center w-full
@@ -438,56 +407,12 @@ function Weather({ search, variant }) {
                                 let image;
                                 let classname = "weather-icone";
 
-                                const condition =
-                                    v?.day?.condition?.text?.toLowerCase() || "";
+                                const condition = v?.day?.condition?.text || "";
+                                const icon = v?.day?.condition?.icon || "";
+                                ({ image, classname } = getWeatherImage(condition, icon, true));
 
-                                const icon =
-                                    v?.day?.condition?.icon?.toLowerCase() || "";
-                                // Set weather image according to condition
-                                if (icon.includes("/night/")) {
-                                    if (condition.includes("clear")) {
-                                        image = "/image/cloudmoon.webp";
-                                    } else {
-                                        image = "/image/cloud.webp";
-                                    }
-                                    classname = "weather-icone";
-                                } else if (
-                                    v?.day?.maxtemp_c >= 30 &&
-                                    (condition.includes("sunny") ||
-                                        condition.includes("clear"))
-                                ) {
-                                    image = "/image/sun.png";
-                                } else if (condition.includes("rain")) {
-                                    image = "/image/raincloud.webp";
-                                } else if (condition.includes("partly cloudy")) {
-                                    image = "/image/cloudsun.png";
-                                    classname = "suncloud-icone";
-                                } else if (
-                                    condition.includes("sunny") ||
-                                    condition.includes("clear")
-                                ) {
-                                    image = "/image/sun.png";
-                                } else if (
-                                    condition.includes("cloud") ||
-                                    condition.includes("haze") ||
-                                    condition.includes("smoky") ||
-                                    condition.includes("mist") ||
-                                    condition.includes("fog")
-                                ) {
-                                    image = "/image/cloud.webp";
-                                } else {
-                                    image = "/image/cloud.webp";
-                                }
-
-                                // Format date
                                 const date = new Date(v.date + "T12:00:00");
-
-                                const dayName =
-                                    index === 0
-                                        ? "Today"
-                                        : date.toLocaleDateString("en-US", {
-                                            weekday: "short",
-                                        });
+                                const dayName = index === 0 ? "Today" : date.toLocaleDateString("en-US", { weekday: "short" });
 
                                 console.log("today", v)
 
@@ -534,4 +459,4 @@ function Weather({ search, variant }) {
     )
 }
 
-export default Weather                                                                                                                                                     
+export default Weather;                                                                                                                                                    
