@@ -3,6 +3,7 @@ import {
     MapContainer,
     TileLayer,
     useMap,
+    useMapEvents,
     Marker,
     Popup,
 } from "react-leaflet";
@@ -12,8 +13,8 @@ import "leaflet/dist/leaflet.css";
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
     iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-    iconUrl:        "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-    shadowUrl:      "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+    iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+    shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
 
 const pulseIcon = L.divIcon({
@@ -36,8 +37,9 @@ const pulseIcon = L.divIcon({
     iconAnchor: [8, 8],
 });
 
+// Fly to new center smoothly
 function MapView({ center, zoom }) {
-    const map  = useMap();
+    const map = useMap();
     const prev = useRef(null);
     useEffect(() => {
         if (!center) return;
@@ -53,6 +55,7 @@ function MapView({ center, zoom }) {
     return null;
 }
 
+// Zoom controls
 function MapControls({ center, zoom }) {
     const map = useMap();
     return (
@@ -64,29 +67,39 @@ function MapControls({ center, zoom }) {
     );
 }
 
+// Capture map click events
+function MapClickHandler({ onMapClick }) {
+    useMapEvents({
+        click(e) {
+            onMapClick(e.latlng.lat, e.latlng.lng);
+        }
+    });
+    return null;
+}
+
 function getWeatherImage(conditionText) {
     const c = (conditionText || '').toLowerCase();
-    if (c.includes('rain'))                                        return '/image/raincloud.webp';
-    if (c.includes('partly cloudy'))                               return '/image/cloudsun.png';
-    if (c.includes('sunny') || c.includes('clear'))                return '/image/sun.png';
+    if (c.includes('rain') || c.includes('drizzle') || c.includes('shower')) return '/image/raincloud.webp';
+    if (c.includes('partly cloudy') || c.includes('mostly clear')) return '/image/cloudsun.png';
+    if (c.includes('sunny') || c.includes('clear')) return '/image/sun.png';
     if (c.includes('cloud') || c.includes('overcast') ||
-        c.includes('mist')  || c.includes('fog'))                  return '/image/cloud.webp';
+        c.includes('mist') || c.includes('fog') || c.includes('thunder')) return '/image/cloud.webp';
     return '/image/cloud.webp';
 }
 
 function Map({ search: searchProp, variant }) {
-    const [inputVal,   setInputVal]   = useState(searchProp || '');
+    const [inputVal, setInputVal] = useState(searchProp || '');
     const [activeCity, setActiveCity] = useState(searchProp || '');
-    const [center,     setCenter]     = useState([20, 0]);
-    const [zoom,       setZoom]       = useState(2);
-    const [markerPos,  setMarkerPos]  = useState(null);
-    const [mapReady,   setMapReady]   = useState(false);
-    const [weather,    setWeather]    = useState(null);
-    const [loading,    setLoading]    = useState(false);
-    const [error,      setError]      = useState('');
-    const [cardOpen,   setCardOpen]   = useState(true);   // collapsible on mobile
+    const [center, setCenter] = useState([20, 0]);
+    const [zoom, setZoom] = useState(2);
+    const [markerPos, setMarkerPos] = useState(null);
+    const [mapReady, setMapReady] = useState(false);
+    const [weather, setWeather] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+    const [cardOpen, setCardOpen] = useState(true);
 
-    // Sync parent-selected city into local state
+    // Sync parent-selected city
     useEffect(() => {
         if (searchProp && searchProp !== activeCity) {
             setInputVal(searchProp);
@@ -95,11 +108,11 @@ function Map({ search: searchProp, variant }) {
         }
     }, [searchProp]);
 
-    // Fetch weather on city change
+    // Fetch weather whenever activeCity changes
     useEffect(() => {
         if (!activeCity?.trim()) {
             setMarkerPos(null); setCenter([20, 0]); setZoom(2);
-            setWeather(null);   setError('');
+            setWeather(null); setError('');
             return;
         }
         let cancelled = false;
@@ -130,45 +143,33 @@ function Map({ search: searchProp, variant }) {
         return () => { cancelled = true; };
     }, [activeCity]);
 
-    const current       = weather?.current;
-    const location      = weather?.location;
+    const current = weather?.current;
+    const location = weather?.location;
     const conditionText = current?.condition?.text || '';
-    const weatherImg    = getWeatherImage(conditionText);
-    const isSuncloud    = conditionText.toLowerCase().includes('partly cloudy');
-    const isCelsius     = variant?.temp !== 'Fahrenhit';
-    const tempUnit      = isCelsius ? '°C' : '°F';
-    const temp          = current ? Math.round(isCelsius ? current.temp_c      : current.temp_f)      : null;
-    const feelsLike     = current ? Math.round(isCelsius ? current.feelslike_c : current.feelslike_f) : null;
+    const weatherImg = getWeatherImage(conditionText);
+    const isSuncloud = conditionText.toLowerCase().includes('partly cloudy') ||
+        conditionText.toLowerCase().includes('mostly clear');
+    const isCelsius = variant?.temp !== 'Fahrenhit';
+    const tempUnit = isCelsius ? '°C' : '°F';
+    const temp = current ? Math.round(isCelsius ? current.temp_c : current.temp_f) : null;
+    const feelsLike = current ? Math.round(isCelsius ? current.feelslike_c : current.feelslike_f) : null;
+
+    // Map click → WeatherAPI accepts "lat,lon" directly
+    const handleMapClick = (lat, lng) => {
+        const query = `${lat},${lng}`;
+        setInputVal('');
+        setActiveCity(query);
+        setCardOpen(true);
+    };
 
     return (
         <div className="flex flex-col w-full h-full">
 
-            {/* ── Search bar (Map's own, full width) ── */}
-            <div className="relative z-[99999] w-full pb-2 shrink-0">
-                <input
-                    type="text"
-                    value={inputVal}
-                    onChange={e => setInputVal(e.target.value)}
-                    onKeyDown={e => {
-                        if (e.key === 'Enter') {
-                            e.preventDefault();
-                            const v = inputVal.trim();
-                            if (v) { setActiveCity(v); setCardOpen(true); }
-                        }
-                    }}
-                    placeholder="Search city on map..."
-                    className="w-full sm:w-[70%] lg:w-[60%] text-white bg-[#202B3B]
-                               px-3 sm:px-4 py-2 sm:py-3 rounded-xl focus:outline-none
-                               text-sm sm:text-base"
-                />
-            </div>
-
-            {/* ── Map + overlay card ── */}
+            {/* Map + overlay card */}
             <div className="relative flex-1 min-h-0 w-full rounded-2xl overflow-hidden">
 
-
-                {/* Weather card overlay */}
-                {activeCity && (
+                {/* Weather detail card */}
+                {(activeCity || weather) && (
                     <div
                         style={{ zIndex: 9999 }}
                         className="absolute top-3 left-3 sm:top-4 sm:left-4
@@ -176,7 +177,7 @@ function Map({ search: searchProp, variant }) {
                                    rounded-xl sm:rounded-2xl shadow-xl border border-white/10
                                    w-[calc(100%-24px)] sm:w-auto sm:max-w-[260px]"
                     >
-                        {/* Card header — always visible, tap to expand/collapse on mobile */}
+                        {/* Header — tap to expand/collapse */}
                         <div
                             className="flex items-center gap-2 p-3 sm:p-4 cursor-pointer select-none"
                             onClick={() => setCardOpen(o => !o)}
@@ -188,7 +189,7 @@ function Map({ search: searchProp, variant }) {
                             ) : current ? (
                                 <img
                                     src={weatherImg}
-                                    className={`shrink-0 ${isSuncloud ? 'suncloud-icone' : 'weather-icone'}`}
+                                    className="shrink-0"
                                     style={{ width: 40, height: 40, objectFit: 'contain' }}
                                     alt={conditionText}
                                 />
@@ -196,10 +197,12 @@ function Map({ search: searchProp, variant }) {
 
                             <div className="flex-1 min-w-0">
                                 <p className="text-sm sm:text-base font-bold leading-tight truncate">
-                                    {loading ? 'Loading…' : error ? error : (location?.name || activeCity)}
+                                    {loading ? 'Loading…' : error ? error : (location?.name || '—')}
                                 </p>
                                 {!loading && !error && location && (
-                                    <p className="text-white/50 text-[10px] sm:text-xs truncate">{location.country}</p>
+                                    <p className="text-white/50 text-[10px] sm:text-xs truncate">
+                                        {location.region ? `${location.region},` : ''}{location.country}
+                                    </p>
                                 )}
                             </div>
 
@@ -210,7 +213,6 @@ function Map({ search: searchProp, variant }) {
                                 </div>
                             )}
 
-                            {/* Chevron */}
                             <svg
                                 className={`w-4 h-4 text-white/40 shrink-0 transition-transform ${cardOpen ? 'rotate-180' : ''}`}
                                 viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
@@ -219,7 +221,7 @@ function Map({ search: searchProp, variant }) {
                             </svg>
                         </div>
 
-                        {/* Expandable detail body */}
+                        {/* Detail body */}
                         {cardOpen && !loading && !error && current && (
                             <div className="px-3 sm:px-4 pb-3 sm:pb-4 border-t border-white/10">
                                 <p className="text-white/40 text-[10px] sm:text-xs italic mt-2 mb-2">{conditionText}</p>
@@ -252,6 +254,7 @@ function Map({ search: searchProp, variant }) {
                     whenReady={() => setMapReady(true)}
                 >
                     {mapReady && <MapView center={center} zoom={zoom} />}
+                    <MapClickHandler onMapClick={handleMapClick} />
                     <MapControls center={center} zoom={zoom} />
                     <TileLayer
                         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -260,7 +263,8 @@ function Map({ search: searchProp, variant }) {
                     {markerPos && (
                         <Marker position={markerPos} icon={pulseIcon}>
                             <Popup>
-                                <strong>{location?.name || activeCity}</strong><br />
+                                <strong>{location?.name || '—'}</strong>
+                                {location?.region ? `, ${location.region}` : ''}<br />
                                 {current ? `${temp}${tempUnit} — ${conditionText}` : 'Loading...'}
                             </Popup>
                         </Marker>

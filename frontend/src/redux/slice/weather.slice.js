@@ -16,7 +16,8 @@ export const getWeather = createAsyncThunk(
             const res = await axios.get(
                 'http://localhost:3000/api/v1/weather/getweather',
                 {
-                    params: { city }
+                    params: { city },
+                    headers: { 'Cache-Control': 'no-cache' }
                 }
             );
 

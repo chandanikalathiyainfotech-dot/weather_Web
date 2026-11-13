@@ -107,7 +107,6 @@ function Getstart() {
     }
 
     const month = new Date().getMonth() + 1;
-
     let mainimgpart, smallimgpart;
 
     if (month >= 12 || month <= 2) {
@@ -176,3 +175,7 @@ function Getstart() {
 }
 
 export default Getstart;
+ 
+
+
+                                                                                                                                                                                                                                                                                                                                                                        

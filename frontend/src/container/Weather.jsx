@@ -54,6 +54,21 @@ function Weather({ search, variant }) {
         setPressure(Pressure)
     }, [current, today])
 
+    // Precipitation converter
+    function precipConverter(unit, mm, inches) {
+        if (unit === 'Inches') return { value: (inches ?? 0).toFixed(2), label: 'in' };
+        return { value: (mm ?? 0).toFixed(1), label: 'mm' };
+    }
+
+    // Visibility/Distance converter
+    function visConverter(unit, km, miles) {
+        if (unit === 'miles') return { value: (miles ?? 0).toFixed(1), label: 'mi' };
+        return { value: (km ?? 0).toFixed(1), label: 'km' };
+    }
+
+    const precip = precipConverter(variant?.precipitation, current?.precip_mm, current?.precip_in);
+    const vis    = visConverter(variant?.distance, current?.vis_km, current?.vis_miles);
+
     useEffect(() => {
         if (search && search.trim()) {
             // search bar ya selected city — isko priority hai
@@ -310,14 +325,13 @@ function Weather({ search, variant }) {
                             <div className="flex gap-3">
                                 <IoWater className="air-icone" />
                                 <div className="text-air">
-                                    <p className="airtext-top">Chance of rain</p>
+                                    <p className="airtext-top">Precipitation</p>
 
                                     <h4 className="relative w-fit text-[24px] sm:text-[30px] font-bold text-white/70 -mt-1">
-                                        {current?.chance_of_rain + '%'}
+                                        {precip.value + precip.label}
                                     </h4>
                                 </div>
                             </div>
-
                             <div className="flex gap-3">
                                 <FaSun className="air-icone" />
                                 <div className="text-air">
@@ -354,8 +368,8 @@ function Weather({ search, variant }) {
                                     <div className="flex gap-3">
                                         <IoWater className="air-icone" />
                                         <div className="text-air">
-                                            <p className="airtext-top">Chance of rain</p>
-                                            <h4 className="relative w-fit text-[24px] sm:text-[28px] font-bold text-white -mt-1">{current?.chance_of_rain + '%'}</h4>
+                                            <p className="airtext-top">Precipitation</p>
+                                            <h4 className="relative w-fit text-[24px] sm:text-[28px] font-bold text-white -mt-1">{precip.value + precip.label}</h4>
                                         </div>
                                     </div>
                                     <div className="flex gap-3">
@@ -376,7 +390,7 @@ function Weather({ search, variant }) {
                                         <MdVisibility className="air-icone" />
                                         <div className="text-air">
                                             <p className="airtext-top">Visibility</p>
-                                            <h4 className="relative w-fit text-[24px] sm:text-[28px] font-bold text-white -mt-1">{current?.vis_km + 'km'}</h4>
+                                            <h4 className="relative w-fit text-[24px] sm:text-[28px] font-bold text-white -mt-1">{vis.value + vis.label}</h4>
                                         </div>
                                     </div>
                                     <div className="flex gap-3">
@@ -406,7 +420,6 @@ function Weather({ search, variant }) {
                             {forecast?.map((v, index) => {
                                 let image;
                                 let classname = "weather-icone";
-
                                 const condition = v?.day?.condition?.text || "";
                                 const icon = v?.day?.condition?.icon || "";
                                 ({ image, classname } = getWeatherImage(condition, icon, true));

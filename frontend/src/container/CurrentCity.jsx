@@ -179,7 +179,7 @@ function CurrentCity({ search, onCangeCity, variant, setSearchvalue, changeselec
 
                         console.log("selectcity", selectCity === v.city, selectCity, selcity)
 
-        return (
+                        return (
                             <div
                                 key={v.city}
                                 className={`flex px-3 sm:px-5 py-3 rounded-2xl items-center justify-between mt-3 sm:mt-4 cursor-pointer transition-all ${selectCity?.toLowerCase() === v.city?.toLowerCase()
@@ -267,7 +267,7 @@ function CurrentCity({ search, onCangeCity, variant, setSearchvalue, changeselec
 
                                     const time = date.toLocaleTimeString("en-US", {
                                         hour: "numeric",
-                                        minute: "2-digit",
+                                        minute: "2-digit",          
                                         hour12: true
                                     });
 
@@ -300,7 +300,7 @@ function CurrentCity({ search, onCangeCity, variant, setSearchvalue, changeselec
                                             </div>
                                         </SwiperSlide>
                                     )
-                                })}
+                                })}       
                             </Swiper>
 
                             <button className="forecast-swiper-button-next absolute right-0 sm:-right-3 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-[#0f1624]/90 border border-white/10 text-white hover:bg-blue-500 transition-all">
