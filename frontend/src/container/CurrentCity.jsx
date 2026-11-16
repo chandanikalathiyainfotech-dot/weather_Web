@@ -267,7 +267,7 @@ function CurrentCity({ search, onCangeCity, variant, setSearchvalue, changeselec
 
                                     const time = date.toLocaleTimeString("en-US", {
                                         hour: "numeric",
-                                        minute: "2-digit",          
+                                        minute: "2-digit",
                                         hour12: true
                                     });
 
@@ -286,12 +286,10 @@ function CurrentCity({ search, onCangeCity, variant, setSearchvalue, changeselec
                                                         after:-translate-y-1/2 after:bg-[#f5f5f53a]">
                                                 <div className="w-fit p-1 sm:p-2 text-center">
                                                     <p className="font-bold text-xs sm:text-sm">{time ?? "6:00 AM"}</p>
-
                                                     <img
                                                         src={image}
                                                         className={`${classname} mx-auto mt-1 sm:mt-2`}
                                                     />
-
                                                     <h3 className="relative w-fit text-lg sm:text-xl md:text-2xl font-bold mx-auto mt-1 sm:mt-2">
                                                         {Math.round(variant?.temp === 'Celsius' ? v?.temp_c : v?.temp_f)}
                                                         <RxDot className="absolute -right-4 sm:-right-5 top-0 text-md stroke-[0.5]" />
@@ -300,7 +298,7 @@ function CurrentCity({ search, onCangeCity, variant, setSearchvalue, changeselec
                                             </div>
                                         </SwiperSlide>
                                     )
-                                })}       
+                                })}
                             </Swiper>
 
                             <button className="forecast-swiper-button-next absolute right-0 sm:-right-3 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-[#0f1624]/90 border border-white/10 text-white hover:bg-blue-500 transition-all">
@@ -328,8 +326,7 @@ function CurrentCity({ search, onCangeCity, variant, setSearchvalue, changeselec
 
                                 return (
                                     <div key={v.date}
-                                        className={`grid grid-cols-12 items-center text-white/70 py-2 sm:py-3 ${index !== 2 ? "border-b border-white/20" : ""}`}
-                                    >
+                                        className={`grid grid-cols-12 items-center text-white/70 py-2 sm:py-3 ${index !== 2 ? "border-b border-white/20" : ""}`}>
                                         <h4 className="col-span-3 text-xs sm:text-sm">{dayName}</h4>
                                         <div className="col-span-5 flex gap-1 items-center min-w-0">
                                             <img src={image} alt={v?.day?.condition?.text} className={`${classname} shrink-0`} />
