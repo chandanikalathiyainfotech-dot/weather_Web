@@ -243,7 +243,7 @@ function Map({ search: searchProp, variant }) {
                         )}
                     </div>
                 )}
-
+    
                 {/* Leaflet map */}
                 <MapContainer
                     center={center}
