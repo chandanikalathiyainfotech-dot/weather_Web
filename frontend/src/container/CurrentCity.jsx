@@ -258,9 +258,7 @@ function CurrentCity({ search, onCangeCity, variant, setSearchvalue, changeselec
                                     1280: { slidesPerView: 3 },
                                     1536: { slidesPerView: 3 }
                                 }}
-                                className="w-full px-8 sm:px-10"
-                            >
-
+                                className="w-full px-8 sm:px-10">
                                 {today?.hour?.map((v, index) => {
 
                                     const date = new Date(v.time_epoch * 1000);
@@ -280,6 +278,7 @@ function CurrentCity({ search, onCangeCity, variant, setSearchvalue, changeselec
 
                                     return (
                                         <SwiperSlide key={index} className="relative flex items-center justify-center">
+
                                             <div className="relative flex items-center justify-center w-full
                                                         after:hidden sm:after:block after:absolute after:right-0 after:top-1/2
                                                         after:h-[80px] md:after:h-[110px] after:w-px
@@ -296,6 +295,7 @@ function CurrentCity({ search, onCangeCity, variant, setSearchvalue, changeselec
                                                     </h3>
                                                 </div>
                                             </div>
+
                                         </SwiperSlide>
                                     )
                                 })}
@@ -306,6 +306,7 @@ function CurrentCity({ search, onCangeCity, variant, setSearchvalue, changeselec
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                                 </svg>
                             </button>
+
                         </div>
                     </div>
 
@@ -346,7 +347,6 @@ function CurrentCity({ search, onCangeCity, variant, setSearchvalue, changeselec
                             })}
                         </div>
                     </div>
-
                 </div>
             </div>
         </main>
