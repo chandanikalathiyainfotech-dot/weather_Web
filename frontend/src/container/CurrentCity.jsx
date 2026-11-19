@@ -9,6 +9,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { getmultiplectyWeather, getWeather } from "../redux/slice/weather.slice";
 import { useState } from "react";
 import { getWeatherImage } from "../utils/weatherImage";
+import { motion, AnimatePresence } from "framer-motion";
+
 
 function CurrentCity({ search, onCangeCity, variant, setSearchvalue, changeselectedvalue, selcity }) {
 
@@ -164,10 +166,39 @@ function CurrentCity({ search, onCangeCity, variant, setSearchvalue, changeselec
         onCangeCity('');
     }
 
+    // ── Framer Motion variants ──────────────────────────────────────────────
+    const fadeUp = {
+        hidden: { opacity: 0, y: 28 },
+        show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } }
+    };
+    const slideLeft = {
+        hidden: { opacity: 0, x: -40 },
+        show: { opacity: 1, x: 0, transition: { duration: 0.55, ease: 'easeOut' } }
+    };
+    const slideRight = {
+        hidden: { opacity: 0, x: 50 },
+        show: { opacity: 1, x: 0, transition: { duration: 0.55, ease: 'easeOut' } }
+    };
+    const scaleIn = {
+        hidden: { opacity: 0, scale: 0.65 },
+        show: { opacity: 1, scale: 1, transition: { duration: 0.6, type: 'spring', stiffness: 130 } }
+    };
+    const stagger = {
+        hidden: {},
+        show: { transition: { staggerChildren: 0.09 } }
+    };
+    // ────────────────────────────────────────────────────────────────────────
+
+
     return (
         <main>
             <div className="flex flex-col lg:flex-row gap-4 xl:gap-6 2xl:gap-10 w-full">
-                <div className="w-full lg:w-[60%] xl:w-[65%] 2xl:w-[70%] text-white">
+                <motion.div
+                    className="w-full lg:w-[60%] xl:w-[65%] 2xl:w-[70%] text-white"
+                    variants={stagger}
+                    initial="hidden"
+                    animate="show"
+                >
                     {cityweather?.map((v, i) => {
 
                         let image;
@@ -180,7 +211,10 @@ function CurrentCity({ search, onCangeCity, variant, setSearchvalue, changeselec
                         console.log("selectcity", selectCity === v.city, selectCity, selcity)
 
                         return (
-                            <div
+                            <motion.div
+                                variants={fadeUp}
+                                whileHover={{ scale: 1.02, y: -3, transition: { duration: 0.18 } }}
+                                whileTap={{ scale: 0.98 }}
                                 key={v.city}
                                 className={`flex px-3 sm:px-5 py-3 rounded-2xl items-center justify-between mt-3 sm:mt-4 cursor-pointer transition-all ${selectCity?.toLowerCase() === v.city?.toLowerCase()
                                     ? 'bg-transparent border-[#0461A5] border-2'
@@ -201,14 +235,22 @@ function CurrentCity({ search, onCangeCity, variant, setSearchvalue, changeselec
                                     </h3>
                                     <span className="ml-1 text-base sm:text-xl font-semibold mt-1">°{variant?.temp === 'Celsius' ? 'C' : 'F'}</span>
                                 </div>
-                            </div>
+                            </motion.div>
                         )
                     })}
-                </div>
+                </motion.div>
 
-                <div className="w-full lg:w-[40%] xl:w-[35%] 2xl:w-[25%] text-white">
-                    <div className="flex flex-col sm:flex-row sm:justify-between items-center w-full gap-4 sm:gap-0 border-b border-white/20 px-3 sm:px-4 pb-6 sm:pb-8">
-                        <div className="py-2 text-center sm:text-left">
+                <motion.div
+                    className="w-full lg:w-[40%] xl:w-[35%] 2xl:w-[25%] text-white"
+                    variants={slideRight}
+                    initial="hidden"
+                    animate="show"
+                >
+                    <motion.div
+                        className="flex flex-col sm:flex-row sm:justify-between items-center w-full gap-4 sm:gap-0 border-b border-white/20 px-3 sm:px-4 pb-6 sm:pb-8"
+                        variants={fadeUp}
+                    >
+                        <motion.div className="py-2 text-center sm:text-left" variants={slideLeft}>
                             <h2 className="text-[22px] sm:text-[28px] lg:text-[22px] xl:text-[28px] font-bold">{location?.name}</h2>
                             <p className="text-white/70 mt-1 text-sm sm:text-base">Chance of rain: {current?.chance_of_rain ?? '--'}%</p>
                             <div className="items-start mt-4 sm:mt-8 hidden sm:flex">
@@ -217,20 +259,27 @@ function CurrentCity({ search, onCangeCity, variant, setSearchvalue, changeselec
                                 </h1>
                                 <span className="ml-1 text-xl sm:text-2xl font-semibold mt-1">°{variant?.temp === 'Celsius' ? 'C' : 'F'}</span>
                             </div>
-                        </div>
-                        <div>
+                        </motion.div>
+                        <motion.div
+                            variants={scaleIn}
+                            animate={{ y: [0, -12, 0], rotate: [0, 4, -4, 0] }}
+                            transition={{
+                                y: { duration: 3.2, repeat: Infinity, ease: "easeInOut" },
+                                rotate: { duration: 6, repeat: Infinity, ease: "easeInOut" }
+                            }}
+                        >
                             <img src='/image/sun.png' className="w-[100px] h-[100px] sm:w-[120px] sm:h-[120px]" alt="weather" />
-                        </div>
-                        <div className="flex items-start sm:hidden">
+                        </motion.div>
+                        <motion.div className="flex items-start sm:hidden" variants={fadeUp}>
                             <h1 className="text-4xl font-bold">
                                 {Math.round(variant?.temp === 'Celsius' ? current?.temp_c : current?.temp_f)}
                             </h1>
                             <span className="ml-1 text-xl font-semibold mt-1">°{variant?.temp === 'Celsius' ? 'C' : 'F'}</span>
-                        </div>
-                    </div>
+                        </motion.div>
+                    </motion.div>
 
                     {/* forecast */}
-                    <div className="py-6 sm:py-10 border-b border-white/20 relative">
+                    <motion.div className="py-6 sm:py-10 border-b border-white/20 relative" variants={fadeUp}>
                         <p className="uppercase text-white/70 text-xs sm:text-sm">today's forecast</p>
 
                         <div className="w-full mx-auto flex mt-4 sm:mt-5 relative">
@@ -278,11 +327,16 @@ function CurrentCity({ search, onCangeCity, variant, setSearchvalue, changeselec
 
                                     return (
                                         <SwiperSlide key={index} className="relative flex items-center justify-center">
-
-                                            <div className="relative flex items-center justify-center w-full
+                                            <motion.div
+                                                className="relative flex items-center justify-center w-full
                                                         after:hidden sm:after:block after:absolute after:right-0 after:top-1/2
                                                         after:h-[80px] md:after:h-[110px] after:w-px
-                                                        after:-translate-y-1/2 after:bg-[#f5f5f53a]">
+                                                        after:-translate-y-1/2 after:bg-[#f5f5f53a]"
+                                                initial={{ opacity: 0, y: 20 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                transition={{ delay: index * 0.025, duration: 0.35 }}
+                                                whileHover={{ scale: 1.08, transition: { duration: 0.18 } }}
+                                            >
                                                 <div className="w-fit p-1 sm:p-2 text-center">
                                                     <p className="font-bold text-xs sm:text-sm">{time ?? "6:00 AM"}</p>
                                                     <img
@@ -294,8 +348,7 @@ function CurrentCity({ search, onCangeCity, variant, setSearchvalue, changeselec
                                                         <RxDot className="absolute -right-4 sm:-right-5 top-0 text-md stroke-[0.5]" />
                                                     </h3>
                                                 </div>
-                                            </div>
-
+                                            </motion.div>
                                         </SwiperSlide>
                                     )
                                 })}
@@ -308,13 +361,13 @@ function CurrentCity({ search, onCangeCity, variant, setSearchvalue, changeselec
                             </button>
 
                         </div>
-                    </div>
+                    </motion.div>
 
-                    <div className="pt-8">
+                    <motion.div className="pt-8" variants={fadeUp}>
                         <p className="uppercase text-white/70 text-xs sm:text-sm">3-days forecast</p>
 
                         <div className="mt-2">
-                            {forecast?.slice(0, 3)?.map((v, index) => {
+                            {forecast?.slice(0, 3)?.map((v,index) => {
                                 let image;
                                 let classname = "daysforcast-icone";
 
@@ -326,7 +379,12 @@ function CurrentCity({ search, onCangeCity, variant, setSearchvalue, changeselec
                                 const dayName = index === 0 ? "Today" : date.toLocaleDateString("en-US", { weekday: "short" });
 
                                 return (
-                                    <div key={v.date}
+                                    <motion.div
+                                        key={v.date}
+                                        initial={{ opacity: 0, x: 35 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ delay: index * 0.07, duration: 0.4, ease: "easeOut" }}
+                                        whileHover={{ x: 4, transition: { duration: 0.15 } }}
                                         className={`grid grid-cols-12 items-center text-white/70 py-2 sm:py-3 ${index !== 2 ? "border-b border-white/20" : ""}`}>
                                         <h4 className="col-span-3 text-xs sm:text-sm">{dayName}</h4>
                                         <div className="col-span-5 flex gap-1 items-center min-w-0">
@@ -342,12 +400,12 @@ function CurrentCity({ search, onCangeCity, variant, setSearchvalue, changeselec
                                                 {Math.round(variant?.temp === 'Celsius' ? v?.day?.maxtemp_c : v?.day?.maxtemp_f)}°
                                             </span>
                                         </div>
-                                    </div>
+                                    </motion.div>
                                 );
                             })}
                         </div>
-                    </div>
-                </div>
+                    </motion.div>
+                </motion.div>
             </div>
         </main>
     )

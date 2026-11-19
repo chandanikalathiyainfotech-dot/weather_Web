@@ -8,7 +8,10 @@ import {
     useMotionValue,
     useMotionValueEvent,
     useTransform,
-    useScroll
+    useScroll,
+    useAnimate,
+    arc,
+    AnimatePresence
 } from "motion/react"
 import { IoIosArrowRoundForward } from "react-icons/io";
 
@@ -118,9 +121,255 @@ const pixelsPerDegree = 3
 const normalise = (degrees) =>
     ((Math.round(degrees) % 360) + 360) % 360
 
+const PRODUCT_SIZE = 160
+const BASKET_BOX = 56
+const FLY_SCALE = BASKET_BOX / PRODUCT_SIZE
+
+const stage = {
+    position: "relative",
+    display: "flex",
+    alignItems: "center",
+    overflow: "hidden",
+    fontFamily: "var(--font-mono)",
+    color: "var(--foreground)"
+}
+
+const basket = {
+    position: "absolute",
+    bottom: 0,
+    left: 400,
+    width: BASKET_BOX,
+    height: BASKET_BOX,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    background: "var(--layer)",
+    border: "1px solid var(--border)",
+    color: "var(--accent)",
+    willChange: "transform",
+}
+
+const ring = {
+    position: "absolute",
+    inset: -1,
+    border: "1px solid var(--accent)",
+    opacity: 0,
+    pointerEvents: "none",
+    willChange: "transform, opacity",
+}
+
+const center = {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: 18,
+}
+
+const product = {
+    width: PRODUCT_SIZE,
+    height: 100,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    background: "var(--layer)",
+    border: "1px solid var(--border)",
+    willChange: "transform, opacity, clip-path",
+}
+
+const glyph = {
+    fontSize: 84,
+    lineHeight: 1,
+    userSelect: "none",
+}
+
+const meta = {
+    display: "flex",
+    alignItems: "baseline",
+    gap: 12,
+    fontFamily: "var(--font-mono)",
+    fontSize: 13,
+    letterSpacing: "0.04em",
+}
+
+const name = {
+    color: "Helvetica Neue",
+}
+
+const price = {
+    color: "Helvetica Neue",
+}
+
+const button = {
+    marginTop: 4,
+    padding: "13px 26px",
+    border: "none",
+    background: "#83E6F7",
+    color: "black",
+    fontFamily: "Helvetica Neue",
+    fontSize: 12,
+    letterSpacing: "0.12em",
+    textTransform: "uppercase",
+    cursor: "pointer",
+}
+
+
+function BasketIcon() {
+    return (
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="26"
+            height="26"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+        >
+            <path d="m15 11-1 9" />
+            <path d="m19 11-4-7" />
+            <path d="M2 11h20" />
+            <path d="m3.5 11 1.6 7.4a2 2 0 0 0 2 1.6h9.8a2 2 0 0 0 2-1.6l1.7-7.4" />
+            <path d="M4.5 15.5h15" />
+            <path d="m5 11 4-7" />
+            <path d="m9 11 1 9" />
+        </svg>
+    )
+}
+
+//holdto keep counting
+function StepButton({ change, onStep, disabled }) {
+    const scope = useRef(null)
+    const snap = {
+        type: "spring",
+        stiffness: 500,
+        damping: 25,
+    }
+
+    const lively = {
+        type: "spring",
+        stiffness: 400,
+        damping: 20,
+    }
+
+    return (
+        <motion.button
+            ref={scope}
+            className="st-step"
+            aria-label={change > 0 ? "Add guest" : "Remove guest"}
+            aria-disabled={disabled || undefined}
+            disabled={disabled}
+
+            tap={{ hold: 0.4, repeat: 0.08 }}
+            onTapStart={() => onStep(change)}
+            onTap={(event) => {
+                if (event.type === "pointerup") return
+
+                onStep(change)
+
+                animate(
+                    scope.current,
+                    { scale: [0.82, 0.88] },
+                    lively
+                )
+            }}
+            whileTap={{ scale: 0.88, transition: snap }}
+            transition={lively}
+        >
+            <svg
+                width="18"
+                height="18"
+                viewBox="0 0 18 18"
+                aria-hidden="true"
+            >
+                <path
+                    d={change > 0 ? "M4 9h10M9 4v10" : "M4 9h10"}
+                />
+            </svg>
+        </motion.button>
+    )
+}
+
+//double tap for like on post
+function HeartBurst({ x, y, rotate, onDone }) {
+    const [scope, animate] = useAnimate()
+    const heart = useRef(null)
+
+    useEffect(() => {
+        const element = heart.current
+
+        // A bouncy spring overshoots, so the heart pops
+        animate(
+            element,
+            { scale: [0, 1], opacity: [0, 1], rotate: [0, rotate] },
+            {
+                type: "spring",
+                visualDuration: 0.3,
+                bounce: 0.6,
+                opacity: { duration: 0.1 },
+            },
+        )
+
+        // The exit runs on the container
+        animate(
+            scope.current,
+            { y: -48, scale: 0.7, opacity: 0 },
+            { duration: 0.35, ease: "easeIn", delay: 0.5 },
+        ).then(onDone)
+    }, [])
+
+    return (
+        <div ref={scope} className="dt-burst" style={{ left: x, top: y }}>
+            {particles.map((angle, i) => (
+                <motion.span
+                    key={i}
+                    className="dt-particle"
+                    initial={{ x: 0, y: 0, scale: 1, opacity: 1 }}
+                    animate={{
+                        x: Math.cos(angle) * 64,
+                        y: Math.sin(angle) * 64,
+                        scale: 0,
+                        opacity: [1, 1, 0],
+                    }}
+                    transition={{
+                        duration: 0.6,
+                        ease: [0.2, 0, 0, 1],
+                        delay: 0.06,
+                    }}
+                />
+            ))}
+
+            <svg
+                ref={heart}
+                className="dt-heart"
+                width="96"
+                height="96"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+            >
+                <path d={heartPath} fill="#ffffff" />
+            </svg>
+        </div>
+    )
+}
+
+const heartPath =
+    "M12 20.5s-7.5-4.6-9.3-9.2C1.4 8 3.4 4.5 6.9 4.5c2.1 0 3.6 1.2 5.1 3 1.5-1.8 3-3 5.1-3 3.5 0 5.5 3.5 4.2 6.8-1.8 4.6-9.3 9.2-9.3 9.2z"
+
+const particles = Array.from(
+    { length: 8 },
+    (_, i) => (i / 8) * Math.PI * 2 - Math.PI / 2,
+)
 
 //motion component   function
-function Motion() {
+function Motion({
+    strength = 0.5,
+    peak = 0.15,
+    flyRotate = 0.9,
+    duration = 0.45,
+    basketVelocityFactor = 0.05,
+    direction = "cw",
+} = {}) {
 
     const [state, setState] = useState("locked");
 
@@ -248,6 +497,389 @@ function Motion() {
         )
     }
 
+    // addtocart effect
+
+    const [scope, animate] = useAnimate()
+    const productRef = useRef(null)
+    const basketRef = useRef(null)
+    const ringRef = useRef(null)
+    const [isFlying, setIsFlying] = useState(false)
+
+    const productX = useMotionValue(0)
+    const productY = useMotionValue(0)
+
+    const addToBasket = async () => {
+        const product = productRef.current
+        const basket = basketRef.current
+        const ring = ringRef.current
+
+        if (!product || !basket || !ring || isFlying) return
+
+        setIsFlying(true)
+
+        const from = product.getBoundingClientRect()
+        const to = basket.getBoundingClientRect()
+
+        const dx =
+            to.left + to.width / 2 -
+            (from.left + from.width / 2)
+
+        const dy =
+            to.top + to.height / 2 -
+            (from.top + from.height / 2)
+
+        // Fly product into basket
+        await animate(
+            product,
+            {
+                x: dx,
+                y: dy,
+                scale: FLY_SCALE,
+                opacity: [1, 1, 0],
+            },
+            {
+                duration,
+                path: arc({
+                    strength,
+                    peak,
+                    rotate: flyRotate,
+                    direction: direction === "auto" ? undefined : direction,
+                }),
+                ease: [0.74, 0.18, 0.93, 0.69],
+                opacity: {
+                    inherit: true,
+                    times: [0, 0.95, 1],
+                },
+            }
+        )
+
+        // Basket impact animation
+        animate(
+            basket,
+            { x: 0, y: 0 },
+            {
+                type: "spring",
+                stiffness: 500,
+                damping: 12,
+                x: {
+                    inherit: true,
+                    velocity: productX.getVelocity() * basketVelocityFactor,
+                },
+                y: {
+                    inherit: true,
+                    velocity: productY.getVelocity() * basketVelocityFactor,
+                },
+            }
+        )
+
+        // Basket ripple effect
+        animate(
+            ring,
+            {
+                scale: [1, 2.2],
+                opacity: [0.8, 0],
+            },
+            {
+                duration: 0.5,
+                ease: "easeOut",
+            }
+        )
+
+        // Reset invisible product
+        animate(
+            product,
+            {
+                x: 0,
+                y: 0,
+                scale: 0.9,
+                rotate: 0,
+                opacity: 0,
+                clipPath: "inset(0%)",
+            },
+            { duration: 0 }
+        )
+
+        // Bring product back
+        await animate(
+            product,
+            {
+                opacity: 1,
+                scale: 1,
+            },
+            {
+                scale: {
+                    type: "spring",
+                    visualDuration: 0.4,
+                    bounce: 0.35,
+                },
+                opacity: {
+                    duration: 0.25,
+                    ease: "easeOut",
+                },
+            }
+        )
+
+        setIsFlying(false)
+    }
+
+    //pinch or double tap
+    const ui = { type: "spring", stiffness: 305, damping: 33 }
+
+    const limit = (size, scale) =>
+        Math.max(0, (size * (scale - 1)) / 2);
+
+    const clampPan = (value, size, scale) =>
+        Math.min(limit(size, scale), Math.max(-limit(size, scale), value));
+
+    const viewer = useRef(null)
+    const isDragging = useRef(false)
+
+    const scale = useMotionValue(1)
+    const x = useMotionValue(0)
+    const y = useMotionValue(0)
+
+    const hintOpacity = useTransform(scale, [1, 1.15], [1, 0])
+    const zoomOpacity = useTransform(scale, [1, 1.15], [0, 1])
+
+    const [zoom, setZoom] = useState("1.0×")
+
+    useMotionValueEvent(scale, "change", (latest) =>
+        setZoom(latest.toFixed(1) + "×")
+    )
+
+    const settleEdges = (velocity = { x: 0, y: 0 }) => {
+        const s = scale.get()
+        const { offsetWidth: width, offsetHeight: height } = viewer.current
+
+        animate(x, clampPan(x.get() + velocity.x * 0.2, width, s), {
+            ...ui,
+            velocity: velocity.x,
+        })
+
+        animate(y, clampPan(y.get() + velocity.y * 0.2, height, s), {
+            ...ui,
+            velocity: velocity.y,
+        })
+    }
+
+    const settling = useRef(() => { })
+
+    const afterZoomSettles = (callback) => {
+        cancelFrame(settling.current)
+
+        let last
+
+        const check = (settling.current = () => {
+            const latest = scale.get()
+
+            if (latest === last) {
+                cancelFrame(check)
+                callback()
+            }
+
+            last = latest
+        })
+
+        frame.postRender(check, true)
+    }
+
+    const onDoubleTap = (_event, info) => {
+        const rect = viewer.current.getBoundingClientRect()
+        const current = scale.get()
+        const target = current > 1.05 ? 1 : 2.5
+
+        let px =
+            info.point.x - window.scrollX - rect.left - rect.width / 2
+
+        let py =
+            info.point.y - window.scrollY - rect.top - rect.height / 2
+
+        if (
+            Math.abs(px) > rect.width / 2 ||
+            Math.abs(py) > rect.height / 2
+        ) {
+            px = 0
+            py = 0
+        }
+
+        const ratio = target / current
+
+        animate(scale, target, ui)
+
+        animate(
+            x,
+            clampPan(px - (px - x.get()) * ratio, rect.width, target),
+            ui
+        )
+
+        animate(
+            y,
+            clampPan(py - (py - y.get()) * ratio, rect.height, target),
+            ui
+        )
+    }
+
+    //hold to keep counting
+    const snap1 = { type: "spring", stiffness: 1218, damping: 70 }
+    const ui1 = { type: "spring", stiffness: 305, damping: 33 }
+    const lively = { type: "spring", stiffness: 622, damping: 17 }
+
+    const min = 0
+    const max = 99
+
+    const [value, setValue] = useState(2)
+    const [direction1, setDirection1] = useState(1)
+    const [valueRef, animateValue] = useAnimate()
+    const latest = useRef(value)
+
+    const step = (change) => {
+        const next = Math.min(max, Math.max(min, latest.current + change))
+
+        if (next === latest.current) {
+            // At a limit: a small shake says no
+            animateValue(
+                valueRef.current,
+                { x: [0, 5 * change, -3 * change, 0] },
+                { duration: 0.3 },
+            )
+            return
+        }
+
+        latest.current = next
+        setDirection1(change)
+        setValue(next)
+    }
+
+    //double tap for like post animation
+    const ui2 = { type: "spring", stiffness: 305, damping: 33 }
+    const lively2 = { type: "spring", stiffness: 622, damping: 17 }
+
+    const red = "#ff3b5c"
+    const photo = useRef(null)
+    const [likeButton, animateLike] = useAnimate()
+    const [isLiked, setIsLiked] = useState(false)
+    const [bursts, setBursts] = useState([])
+    const nextId = useRef(0)
+
+    const setLiked = (liked) => {
+        setIsLiked(liked)
+        if (liked) {
+            animateLike(likeButton.current, { scale: [1, 1.35, 1] }, lively)
+        }
+    }
+
+    const onDoubleTap1 = (_event, info) => {
+        const rect = photo.current.getBoundingClientRect()
+
+        let x = info.point.x - window.scrollX - rect.left
+        let y = info.point.y - window.scrollY - rect.top
+
+        // Keyboard presses have no pointer position, so burst from the centre
+        if (x <= 0 || y <= 0 || x >= rect.width || y >= rect.height) {
+            x = rect.width / 2
+            y = rect.height / 2
+        }
+
+        setBursts((current) => [
+            ...current,
+            {
+                id: nextId.current++,
+                x,
+                y,
+                rotate: Math.random() * 30 - 15,
+            },
+        ])
+
+        setLiked(true)
+    }
+
+    //counter
+    const count = useMotionValue(0)
+    const rounded = useTransform(() => Math.round(count.get()))
+
+    useEffect(() => {
+        const controls = animate(count, 200, { duration: 3 })
+        return () => controls.stop()
+    }, [])
+
+    const [count1, setCount1] = useState(0)
+
+    function inc() {
+        if (count1 < 200) {
+            setCount1(count1 + 1)
+        }
+    }
+
+    setTimeout(inc, 0.8);
+
+    //toggle example
+    const [isOn, setIsOn] = useState(false)
+    const toggleSwitch = () => { setIsOn(!isOn) }
+
+    const container = {
+        width: 80,
+        height: 40,
+        backgroundColor: "#e3c8f7",
+        borderRadius: 50,
+        cursor: "pointer",
+        display: "flex",
+        padding: 10,
+        marginBottom: 20,
+        marginLeft:40
+    }
+
+    const handle = {
+        width: 23,
+        height: 23,
+        backgroundColor: '#9911FF',
+        borderRadius: "50%",
+    }
+
+    //reloader animation
+    const initialOrder = [
+        "#1E75F7",
+        "#DD00EE",
+        "#9911FF",
+        "#FF0088"
+    ]
+
+    function shuffle([...array]) {
+        return array.sort(() => Math.random() - 0.5)
+    }
+
+    const spring = {
+        type: "spring",
+        damping: 20,
+        stiffness: 300,
+    }
+
+    const container1 = {
+        listStyle: "none",
+        padding: 0,
+        margin: 0,
+        position: "relative",
+        display: "flex",
+        flexWrap: "wrap",
+        gap: 10,
+        width:150,
+        flexDirection: "row",
+        justifyContent: "center",
+        alignItems: "center",
+        marginBottom:10
+    }
+
+    const item = {
+        width: 50,
+        height: 50,
+        borderRadius: "10px"
+    }
+
+    const [order, setOrder] = useState(initialOrder)
+
+    useEffect(() => {
+        const timeout = setTimeout(() => setOrder(shuffle(order)), 1000)
+        return () => clearTimeout(timeout)
+    }, [order])
 
     return (
         <div className="mt-20 ml-20">
@@ -315,7 +947,7 @@ function Motion() {
                     top: 0,
                     left: 0,
                     right: 0,
-                    height: 10,
+                    height: 5,
                     originX: 0,
                     backgroundColor: "#fc03e3",
                 }}
@@ -494,6 +1126,282 @@ function Motion() {
                     <Stylesheet1 />
                 </div>
             </LazyMotion>
+
+            {/* addtocarteffect */}
+            <h3 className="mt-10 text-2xl font-bold flex items-center"><IoIosArrowRoundForward className="text-4xl font-bold" />Motion along a path / add to cart animation</h3>
+            <div ref={scope} style={stage}>
+                <style>{`#sandbox { position: relative }`}</style>
+
+                <div ref={basketRef} style={basket}>
+                    <motion.div ref={ringRef} style={ring} />
+                    <BasketIcon />
+                </div>
+
+                <div style={center}>
+                    <motion.div
+                        ref={productRef}
+                        style={{
+                            ...product,
+                            x: productX,
+                            y: productY,
+                        }}
+                    >
+                        <span style={glyph}>👟</span>
+                    </motion.div>
+
+                    <div style={meta}>
+                        <span style={name}>Campus 00s</span>
+                        <span style={price}>£128</span>
+                    </div>
+
+                    <motion.button
+                        type="button"
+                        onClick={addToBasket}
+                        disabled={isFlying}
+                        whileHover={{ scale: 1.03 }}
+                        whileTap={{ scale: 0.97 }}
+                        style={{
+                            ...button,
+                            opacity: isFlying ? 0.55 : 1,
+                            pointerEvents: isFlying ? "none" : "auto",
+                        }}
+                    >
+                        Add to basket
+                    </motion.button>
+                </div>
+            </div>
+
+            {/* pinch or double tap */}
+            <h3 className="mt-10 mb-5 text-2xl font-bold flex items-center"><IoIosArrowRoundForward className="text-4xl font-bold" />pinch or double tap</h3>
+            <LazyMotion features={pinchFeatures}>
+                <div className="pz-viewer">
+                    <motion.div
+                        ref={viewer}
+                        className="pz-frame"
+                        aria-label="Pinch or double tap to zoom"
+                        tap={{ count: 2 }}
+                        onTap={onDoubleTap}
+                    >
+                        <motion.img
+                            className="pz-photo"
+                            src="../../public/image/i1.png"
+                            alt="A street in Tokyo at night"
+                            draggable={false}
+                            style={{ scale, x, y }}
+                            pinch={{
+                                scale: { min: 1, max: 4 },
+                                rotate: false,
+                                onStart: () => cancelFrame(settling.current),
+                                onEnd: () =>
+                                    !isDragging.current && afterZoomSettles(settleEdges),
+                            }}
+                            drag
+                            dragMomentum={false}
+                            onDragStart={() => {
+                                isDragging.current = true
+                                cancelFrame(settling.current)
+                            }}
+                            onDragEnd={(_event, info) => {
+                                isDragging.current = false
+                                afterZoomSettles(() => settleEdges(info.velocity))
+                            }}
+                        />
+                    </motion.div>
+
+                    <div className="pz-footer">
+                        <div className="pz-caption">
+                            <span className="pz-title">Shinjuku</span>
+                            <span className="pz-meta">11:42 pm</span>
+                        </div>
+
+                        <div className="pz-status">
+                            <motion.span
+                                className="pz-hint"
+                                style={{ opacity: hintOpacity }}
+                            >
+                                Pinch or double tap
+                            </motion.span>
+
+                            <motion.span
+                                className="pz-zoom"
+                                aria-live="polite"
+                                style={{ opacity: zoomOpacity }}
+                            >
+                                {zoom}
+                            </motion.span>
+                        </div>
+                    </div>
+
+                    <Stylesheet2 />
+                </div>
+            </LazyMotion>
+
+            {/* hold to keep counting */}
+            <h3 className="mt-10 mb-5 text-2xl font-bold flex items-center"><IoIosArrowRoundForward className="text-4xl font-bold" />hold to keep counting</h3>
+            <div className="st-stepper">
+                <span className="st-title" id="guests-label">
+                    Guests
+                </span>
+                <div className="st-control">
+                    <StepButton change={-1} onStep={step} disabled={value === min} />
+                    <div
+                        ref={valueRef}
+                        className="st-value"
+                        role="status"
+                        aria-labelledby="guests-label"
+                    >
+                        <AnimatePresence initial={false} custom={direction}>
+                            <motion.span
+                                key={value}
+                                className="st-digit"
+                                custom={direction}
+                                variants={{
+                                    enter: (d) => ({
+                                        y: 18 * d,
+                                        opacity: 0,
+                                        filter: "blur(4px)",
+                                    }),
+                                    center: { y: 0, opacity: 1, filter: "blur(0px)" },
+                                    exit: (d) => ({
+                                        y: -18 * d,
+                                        opacity: 0,
+                                        filter: "blur(4px)",
+                                        transition: { ...snap1, opacity: { duration: 0.12 } },
+                                    }),
+                                }}
+                                initial="enter"
+                                animate="center"
+                                exit="exit"
+                                transition={ui1}
+                            >
+                                {value}
+                            </motion.span>
+                        </AnimatePresence>
+                    </div>
+                    <StepButton change={1} onStep={step} disabled={value === max} />
+                </div>
+                <span className="st-hint">Hold to keep counting</span>
+                <Stylesheet3 />
+            </div>
+
+            {/* double tap for add like on post */}
+            <h3 className="mt-10 mb-5 text-2xl font-bold flex item-center"><IoIosArrowRoundForward className="text-4xl font-bold" />like on post on double click</h3>
+            <div className="dt-post">
+                <motion.div
+                    ref={photo}
+                    className="dt-photo"
+                    tap={{ count: 2 }}
+                    onTap={onDoubleTap1}
+                    aria-label="Double tap to like"
+                >
+                    <img src="../../public/image/i1.png" alt="" draggable={false} />
+                    {bursts.map((burst) => (
+                        <HeartBurst
+                            key={burst.id}
+                            {...burst}
+                            onDone={() =>
+                                setBursts((current) => current.filter((b) => b.id !== burst.id))
+                            }
+                        />
+                    ))}
+                </motion.div>
+                <div className="dt-footer">
+                    <motion.button
+                        ref={likeButton}
+                        className="dt-like"
+                        onTap={() => setLiked(!isLiked)}
+                        whileTap={{ scale: 0.85 }}
+                        transition={ui}
+                        aria-label={isLiked ? "Unlike" : "Like"}
+                        aria-pressed={isLiked}
+                    >
+                        <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+                            <motion.path
+                                d={heartPath}
+                                initial={false}
+                                animate={{
+                                    fill: isLiked ? red : "rgba(255, 59, 92, 0)",
+                                    stroke: isLiked ? red : "#18222e",
+                                }}
+                                transition={{ duration: 0.2 }}
+                                strokeWidth={1.75}
+                                strokeLinejoin="round"
+                            />
+                        </svg>
+                    </motion.button>
+                    <div className="dt-count">
+                        <AnimatePresence mode="popLayout" initial={false}>
+                            <motion.span
+                                key={isLiked ? "liked" : "unliked"}
+                                initial={{
+                                    y: isLiked ? 10 : -10,
+                                    opacity: 0,
+                                    filter: "blur(4px)",
+                                }}
+                                animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
+                                exit={{ y: isLiked ? -10 : 10, opacity: 0, filter: "blur(4px)" }}
+                                transition={ui}
+                            >
+                                {isLiked ? "1,249" : "1,248"}
+                            </motion.span>
+                        </AnimatePresence>
+                        <span className="dt-unit">likes</span>
+                    </div>
+                    <span className="dt-hint">Double tap the photo</span>
+                </div>
+                <Stylesheet4 />
+            </div>
+
+            {/* counter */}
+            <h3 className="mt-10 mb-3 text-2xl font-bold flex items-center"><IoIosArrowRoundForward className="text-4xl font-bold" /> Counter</h3>
+            <motion.div
+                style={{
+                    fontFamily: "Segoe UI",
+                    fontSize: 40,
+                    lineHeight: 1,
+                    color: "var(--hue-6)",
+                    marginLeft: 40
+                }}
+            >
+                {rounded}
+            </motion.div>
+            <p>{count1}</p>
+
+            {/* toggleswitch example */}
+            <h3 className="mt-10 mb-3 text-2xl font-bold flex item-center"><IoIosArrowRoundForward className="text-4xl font-bold" />Toggle Switch</h3>
+            <button className="toggle-container"
+                style={{
+                    ...container,
+                    justifyContent: "flex-" + (isOn ? "start" : "end")
+                }}
+                onClick={toggleSwitch}
+            >
+                <motion.div
+                    className="toggle-handle"
+                    style={handle}
+                    layout
+                    transition={{
+                        type: "spring",
+                        visualDuration: 0.2,
+                        bounce: 0.2,
+                    }}
+                />
+            </button>
+
+            {/* reloader animation */}
+            <h3 className="mt-10 mb-3 text-2xl font-bold flex item-center"><IoIosArrowRoundForward className="text-4xl font-bold" />Reloader Animation</h3>
+            <ul style={container1}>
+                {
+                    order.map((backgroundColor) => (
+                        <motion.li
+                            key={backgroundColor}
+                            layout
+                            transition={spring}
+                            style={{ ...item, backgroundColor }}
+                        />
+                    ))
+                }
+            </ul>
         </div>
     );
 }
@@ -701,6 +1609,333 @@ function Stylesheet1() {
       .pr-hint {
         font-size: 13px;
         color: #9aa1ae;
+      }
+    `}</style>
+    )
+}
+
+function Stylesheet2() {
+    return (
+        <style>{`
+      .pz-viewer {
+        width: min(340px, calc((100vh - 120px) * 0.75));
+        padding: 8px;
+        border-radius: 24px;
+        background: #ffffff;
+        box-shadow:
+          0 0 0 1px rgba(24, 34, 46, 0.06),
+          0 1px 2px rgba(24, 34, 46, 0.06),
+          0 12px 32px rgba(24, 34, 46, 0.1);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+
+      .pz-frame {
+        position: relative;
+        aspect-ratio: 3 / 4;
+        border-radius: 16px;
+        overflow: hidden;
+        background: #0b0d10;
+        cursor: zoom-in;
+        touch-action: none;
+        -webkit-tap-highlight-color: transparent;
+        isolation: isolate;
+      }
+
+      .pz-frame:focus-visible {
+        outline: 2px solid #2563eb;
+        outline-offset: 2px;
+      }
+
+      .pz-photo {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        cursor: grab;
+      }
+
+      .pz-photo:active {
+        cursor: grabbing;
+      }
+
+      .pz-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 12px 8px 6px;
+      }
+
+      .pz-caption {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+
+      .pz-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: #18222e;
+      }
+
+      .pz-meta {
+        font-size: 13px;
+        color: #9aa1ae;
+      }
+
+      .pz-status {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        min-width: 130px;
+        height: 28px;
+      }
+
+      .pz-hint {
+        font-size: 13px;
+        color: #9aa1ae;
+        white-space: nowrap;
+      }
+
+      .pz-zoom {
+        position: absolute;
+        right: 0;
+        padding: 4px 10px;
+        border-radius: 999px;
+        background: #18222e;
+        color: #ffffff;
+        font-size: 13px;
+        font-weight: 600;
+        font-variant-numeric: tabular-nums;
+      }
+    `}</style>
+    )
+}
+
+function Stylesheet3() {
+    return (
+        <style>{`
+      .st-stepper {
+        display: flex;
+        flex-direction: column;
+        margin-bottom:20px;
+        gap: 14px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+
+      .st-title {
+        font-size: 13px;
+        font-weight: 500;
+        color: #60687a;
+      }
+
+      .st-hint {
+        font-size: 13px;
+        color: #9aa1ae;
+      }
+
+      .st-control {
+        display: flex;
+        align-items: center;
+        width:fit-content;
+        gap: 4px;
+        padding: 6px;
+        border-radius: 999px;
+        background: #ffffff;
+        box-shadow:
+          0 0 0 1px rgba(24, 34, 46, 0.06),
+          0 1px 2px rgba(24, 34, 46, 0.06),
+          0 8px 24px rgba(24, 34, 46, 0.08);
+      }
+
+      .st-step {
+        width: 48px;
+        height: 48px;
+        border: none;
+        border-radius: 50%;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f1f3f6;
+        color: #18222e;
+        cursor: pointer;
+        touch-action: none;
+        -webkit-touch-callout: none;
+        transition:
+          background-color 0.2s,
+          color 0.2s;
+      }
+
+      .st-step:hover {
+        background: #e8ebf0;
+      }
+
+      .st-step[aria-disabled] {
+        color: #b8bec9;
+      }
+
+      .st-step:focus-visible {
+        outline: 2px solid #2563eb;
+        outline-offset: 2px;
+      }
+
+      .st-step path {
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1.75;
+        stroke-linecap: round;
+      }
+
+      .st-value {
+        position: relative;
+        width: 72px;
+        height: 48px;
+        overflow: hidden;
+      }
+
+      .st-digit {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        font-variant-numeric: tabular-nums;
+        color: #18222e;
+      }
+    `}</style>
+    )
+}
+
+function Stylesheet4() {
+    return (
+        <style>{`
+      .dt-post {
+        width: min(300px, calc(100vh - 140px));
+        padding: 8px;
+        border-radius: 24px;
+        background: #ffffff;
+        box-shadow:
+          0 0 0 1px rgba(24, 34, 46, 0.06),
+          0 1px 2px rgba(24, 34, 46, 0.06),
+          0 12px 32px rgba(24, 34, 46, 0.1);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+
+      .dt-photo {
+        position: relative;
+        aspect-ratio: 1;
+        border-radius: 16px;
+        overflow: hidden;
+        cursor: pointer;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .dt-photo:focus-visible {
+        outline: 2px solid #2563eb;
+        outline-offset: 2px;
+      }
+
+      .dt-photo img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        pointer-events: none;
+      }
+
+      .dt-burst {
+        position: absolute;
+        width: 0;
+        height: 0;
+        pointer-events: none;
+      }
+
+      .dt-heart {
+        opacity: 0;
+        transform: scale(0);
+        position: absolute;
+        left: -48px;
+        top: -48px;
+        filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.25));
+      }
+
+      .dt-particle {
+        position: absolute;
+        left: -4px;
+        top: -4px;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #ffffff;
+      }
+
+      .dt-footer {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 8px 6px;
+      }
+
+      .dt-like {
+        width: 36px;
+        height: 36px;
+        margin: -4px;
+        padding: 0;
+        border: none;
+        border-radius: 50%;
+        background: transparent;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+      }
+
+      .dt-like:focus-visible {
+        outline: 2px solid #2563eb;
+      }
+
+      .dt-count {
+        position: relative;
+        display: flex;
+        gap: 4px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #18222e;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .dt-count > span:first-child {
+        display: inline-block;
+      }
+
+      .dt-unit {
+        font-weight: 400;
+        color: #60687a;
+      }
+
+      .dt-hint {
+        margin-left: auto;
+        font-size: 13px;
+        color: #9aa1ae;
+        white-space: nowrap;
+      }
+
+      @media (max-height: 420px) {
+        .dt-hint {
+          display: none;
+        }
       }
     `}</style>
     )

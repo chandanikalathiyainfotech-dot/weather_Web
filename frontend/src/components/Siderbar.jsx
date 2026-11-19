@@ -10,6 +10,7 @@ import Setting from "../container/Setting";
 import { useEffect } from "react";
 import { useState, useRef } from "react";
 import { GetCountries, GetAllCities } from "react-country-state-city";
+import { motion, AnimatePresence } from "framer-motion";
 
 
 function Siderbar() {
@@ -131,6 +132,29 @@ function Siderbar() {
                            
     console.log("selectedcity", selectedcity)
 
+     // ── Framer Motion variants ──────────────────────────────────────────────
+    const fadeUp = {
+        hidden: { opacity: 0, y: 28 },
+        show:   { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } }
+    };
+    const slideLeft = {
+        hidden: { opacity: 0, x: -40 },
+        show:   { opacity: 1, x: 0, transition: { duration: 0.55, ease: 'easeOut' } }
+    };
+    const slideRight = {
+        hidden: { opacity: 0, x: 50 },
+        show:   { opacity: 1, x: 0, transition: { duration: 0.55, ease: 'easeOut' } }
+    };
+    const scaleIn = {
+        hidden: { opacity: 0, scale: 0.65 },
+        show:   { opacity: 1, scale: 1, transition: { duration: 0.6, type: 'spring', stiffness: 130 } }
+    };
+    const stagger = {
+        hidden: {},
+        show:   { transition: { staggerChildren: 0.09 } }
+    };
+    // ────────────────────────────────────────────────────────────────────────
+
     return (
         <main className="flex flex-col min-[992px]:flex-row min-h-screen h-screen px-3 sm:px-5 min-[992px]:px-6 xl:px-10 pt-4 sm:pt-6 min-[992px]:pt-10 pb-20 min-[992px]:pb-10
          bg-[#0B131E] gap-3 sm:gap-4 min-[992px]:gap-5 xl:gap-10 overflow-hidden min-[992px]:overflow-auto">
@@ -164,7 +188,7 @@ function Siderbar() {
                     }
                 </nav>
             </div>
-
+       
             <section className={`w-full h-full pb-2 ${pageurl.includes("/siderbar/maps") ? "overflow-auto" : "overflow-auto"} custom-scrollbar`}>
                 <form className="relative z-[99999]" ref={searchRef}>
                     <input

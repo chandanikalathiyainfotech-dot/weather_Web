@@ -9,6 +9,7 @@ import {
 } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { motion, AnimatePresence } from "framer-motion";
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -162,15 +163,45 @@ function Map({ search: searchProp, variant }) {
         setCardOpen(true);
     };
 
+    // ── Framer Motion variants ──────────────────────────────────────────────
+    const fadeUp = {
+        hidden: { opacity: 0, y: 28 },
+        show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } }
+    };
+    const slideLeft = {
+        hidden: { opacity: 0, x: -40 },
+        show: { opacity: 1, x: 0, transition: { duration: 0.55, ease: 'easeOut' } }
+    };
+    const slideRight = {
+        hidden: { opacity: 0, x: 50 },
+        show: { opacity: 1, x: 0, transition: { duration: 0.55, ease: 'easeOut' } }
+    };
+    const scaleIn = {
+        hidden: { opacity: 0, scale: 0.65 },
+        show: { opacity: 1, scale: 1, transition: { duration: 0.6, type: 'spring', stiffness: 130 } }
+    };
+    const stagger = {
+        hidden: {},
+        show: { transition: { staggerChildren: 0.09 } }
+    };
+    // ────────────────────────────────────────────────────────────────────────
+
     return (
         <div className="flex flex-col w-full h-full">
 
             {/* Map + overlay card */}
-            <div className="relative flex-1 min-h-0 w-full rounded-2xl overflow-hidden">
+            <motion.div
+                variants={stagger}
+                initial="hidden"
+                animate="show"
+                className="relative flex-1 min-h-0 w-full rounded-2xl overflow-hidden">
 
                 {/* Weather detail card */}
                 {(activeCity || weather) && (
-                    <div
+                    <motion.div
+                        variants={slideLeft}
+                        initial="hidden"
+                        animate="show"
                         style={{ zIndex: 9999 }}
                         className="absolute top-3 left-3 sm:top-4 sm:left-4
                                    bg-[#202B3B]/95 backdrop-blur-sm text-white
@@ -223,7 +254,11 @@ function Map({ search: searchProp, variant }) {
 
                         {/* Detail body */}
                         {cardOpen && !loading && !error && current && (
-                            <div className="px-3 sm:px-4 pb-3 sm:pb-4 border-t border-white/10">
+                            <motion.div
+                                variants={fadeUp}
+                                whileHover={{ scale: 1.02, y: -3, transition: { duration: 0.18 } }}
+                                whileTap={{ scale: 0.98 }}
+                                className="px-3 sm:px-4 pb-3 sm:pb-4 border-t border-white/10">
                                 <p className="text-white/40 text-[10px] sm:text-xs italic mt-2 mb-2">{conditionText}</p>
                                 <div className="grid grid-cols-2 gap-x-4 sm:gap-x-6 gap-y-1 text-[11px] sm:text-xs">
                                     <span className="text-white/50">💧 Humidity</span>
@@ -239,11 +274,11 @@ function Map({ search: searchProp, variant }) {
                                     <span className="text-white/50">🌬 Pressure</span>
                                     <span className="text-white font-semibold">{current.pressure_mb} mb</span>
                                 </div>
-                            </div>
+                            </motion.div>
                         )}
-                    </div>
+                    </motion.div>
                 )}
-    
+
                 {/* Leaflet map */}
                 <MapContainer
                     center={center}
@@ -270,7 +305,7 @@ function Map({ search: searchProp, variant }) {
                         </Marker>
                     )}
                 </MapContainer>
-            </div>
+            </motion.div>
         </div>
     );
 }
