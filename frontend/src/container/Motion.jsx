@@ -11,7 +11,8 @@ import {
     useScroll,
     useAnimate,
     arc,
-    AnimatePresence
+    AnimatePresence,
+    interpolate
 } from "motion/react"
 import { IoIosArrowRoundForward } from "react-icons/io";
 
@@ -360,6 +361,39 @@ const particles = Array.from(
     { length: 8 },
     (_, i) => (i / 8) * Math.PI * 2 - Math.PI / 2,
 )
+
+//Path morphing
+// Path morphing
+const getIndex = (_, index) => index
+
+function useFlubber(progress, paths) {
+    return useTransform(progress, paths.map(getIndex), paths, {
+        mixer: (a, b) => interpolate(a, b, { maxSegmentLength: 0.1 }),
+    })
+}
+
+const star =
+    "M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"
+const heart =
+    "M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+const hand =
+    "M23 5.5V20c0 2.2-1.8 4-4 4h-7.3c-1.08 0-2.1-.43-2.85-1.19L1 14.83s1.26-1.23 1.3-1.25c.22-.19.49-.29.79-.29.22 0 .42.06.6.16.04.01 4.31 2.46 4.31 2.46V4c0-.83.67-1.5 1.5-1.5S11 3.17 11 4v7h1V1.5c0-.83.67-1.5 1.5-1.5S15 .67 15 1.5V11h1V2.5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5V11h1V5.5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5z"
+const plane =
+    "M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"
+const lightning = "M7 2v11h3v9l7-12h-4l4-8z"
+const note =
+    "M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"
+
+const paths = [lightning, hand, plane, heart, note, star, lightning]
+const colors = [
+    "#fff312",
+    "#ff0088",
+    "#dd00ee",
+    "#9911ff",
+    "#0d63f8",
+    "#0cdcf7",
+    "#4ff0b7",
+]
 
 //motion component   function
 function Motion({
@@ -825,7 +859,7 @@ function Motion({
         display: "flex",
         padding: 10,
         marginBottom: 20,
-        marginLeft:40
+        marginLeft: 40
     }
 
     const handle = {
@@ -861,11 +895,11 @@ function Motion({
         display: "flex",
         flexWrap: "wrap",
         gap: 10,
-        width:150,
+        width: 150,
         flexDirection: "row",
         justifyContent: "center",
         alignItems: "center",
-        marginBottom:10
+        marginBottom: 10
     }
 
     const item = {
@@ -880,6 +914,161 @@ function Motion({
         const timeout = setTimeout(() => setOrder(shuffle(order)), 1000)
         return () => clearTimeout(timeout)
     }, [order])
+
+    //shared layout animation
+    const allIngredients = [
+        { icon: "🍅", label: "Tomato" },
+        { icon: "🥬", label: "Lecttuce" },
+        { icon: "🧀", label: "Cheese" },
+        { icon: "🥕", label: "Carrot" },
+        { icon: "🍌", label: "Banana" },
+        { icon: "🍇", label: "Grapes" },
+        { icon: "🥂", label: "Champhes?" }
+    ]
+
+    const tabs = ["tomato", "lettuce", "cheese", "carrot", "banana", "grapes", "champhes"]
+    const [selectedtab, setSelectedTab] = useState(allIngredients?.[0])
+
+    const conatiner2 = {
+        width: 600,
+        height: 'fit-content',
+        maxWidth: "calc(100% - 40px)",
+        maxHeight: "calc(100% - 40px)",
+        borderRadius: 10,
+        background: "white",
+        overflow: "hidden",
+        boxShow: "0 1px 1px hsl(0deg 0% 0% / 0.075),0 2px 2px hsl(0deg 0% 0%  / 0.075),0 4px 4px hsl(0deg 0% 0% / 0.075),0 8px 8px hsl(0deg 0% 0% / 0.075),0 16px 16px hsl(0deg 0% 0% / 0.075)",
+        display: "flex",
+        flexdirecction: "column"
+    }
+
+    const nav = {
+        background: '#fdfdfd',
+        padding: "5px 5px 0",
+        borderRadius: "10px",
+        borderBottomLeftRaduis: 0,
+        borderBottomRightRaduis: 0,
+        borderBottom: "1px solid #eeeeee",
+        height: 60,
+    }
+
+    const tabsStyles = {
+        listStyle: "none",
+        padding: 0,
+        margin: 0,
+        fontWeight: 500,
+        fontSize: 14,
+    }
+
+    const tabsContainer = {
+        ...tabsStyles,
+        display: "flex",
+        width: "100%",
+        height: '100%'
+    }
+
+    const tab = {
+        ...tabsStyles,
+        borderRadius: 5,
+        borderBottomLeftRaduis: 0,
+        borederBottomRightRaduis: 0,
+        width: "100%",
+        padding: "10px 15px",
+        position: "relative",
+        background: "white",
+        cursor: "pointer",
+        height: '100%',
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        flex: 1,
+        minWidth: 0,
+        userSelect: "none",
+        color: "black"
+    }
+
+    const underline = {
+        position: "absolute",
+        bottom: -2,
+        left: 0,
+        right: 0,
+        height: 2,
+        background: "blue"
+    }
+
+    const iconeContainer = {
+        display: "flex",
+        justifyContent: "center",
+        alignItem: "center",
+        flex: 1,
+        width: 600,
+    }
+
+    const icon = {
+        fontSize: 128
+    }
+
+
+    // value transform & path drawing
+    const x1 = useMotionValue(0)
+    const xInput = [-100, 0, 100]
+    const background = useTransform(x1, xInput, [
+        "linear-gradient(180deg, #ff008c 0%, rgb(211, 9, 225) 100%)",
+        "linear-gradient(180deg, #7700ff 0%, rgb(68, 0, 255) 100%)",
+        "linear-gradient(180deg, rgb(230, 255, 0) 0%, rgb(3, 209, 0) 100%)",
+    ])
+    const color = useTransform(x1, xInput, [
+        "rgb(211, 9, 225)",
+        "rgb(68, 0, 255)",
+        "rgb(3, 209, 0)",
+    ])
+    const tickPath = useTransform(x1, [10, 100], [0, 1])
+    const crossPathA = useTransform(x1, [-10, -55], [0, 1])
+    const crossPathB = useTransform(x1, [-50, -100], [0, 1])
+
+    const box2 = {
+        width: 140,
+        height: 140,
+        backgroundColor: "white",
+        borderRadius: 20,
+        padding: 20,
+    }
+
+    const container3 = {
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        flex: 1,
+        width: 500,
+        height: 300,
+        maxWidth: "100%",
+        borderRadius: 20,
+    }
+
+
+    const [pathIndex, setPathIndex] = useState(0);
+    const progress = useMotionValue(pathIndex);
+
+    const fill = useTransform(progress, paths.map(getIndex), colors);
+    const path = useFlubber(progress, paths);
+
+    useEffect(() => {
+        const animation = animate(progress, pathIndex, {
+            duration: 0.8,
+            ease: "easeInOut",
+            onComplete: () => {
+                if (pathIndex === paths.length - 1) {
+                    progress.set(0);
+                    setPathIndex(1);
+                } else {
+                    setPathIndex(pathIndex + 1);
+                }
+            },
+        });
+
+        return () => animation.stop();
+    }, [pathIndex, progress]);
+
 
     return (
         <div className="mt-20 ml-20">
@@ -1402,6 +1591,114 @@ function Motion({
                     ))
                 }
             </ul>
+
+
+            {/*shared layout animation*/}
+            <h3 className="mt-10 mb-3 text-2xl font-bold flex item-center"><IoIosArrowRoundForward className="text-4xl font-bold" />Shared layout animation</h3>
+            <div style={conatiner2}>
+                <nav style={nav}>
+                    <ul style={tabsContainer}>
+                        {
+                            allIngredients.map((item) => (
+                                <motion.li
+                                    key={item.label}
+                                    initial={false}
+                                    animate={{
+                                        backgroundColor:
+                                            item === selectedtab ? "#eee" : "#eee0",
+                                    }}
+                                    style={tab}
+                                    onClick={() => setSelectedTab(item)}
+                                >
+                                    {`${item.icon} ${item.label}`}
+                                    {item.label === selectedtab.label ?
+                                        <motion.div
+                                            style={underline}
+                                            layoutId="underline"
+                                            id="underline"
+                                        />
+                                        : null}
+                                </motion.li>
+                            ))
+                        }
+                    </ul>
+                </nav>
+            </div>
+            <main style={iconeContainer}>
+                <AnimatePresence mode="wait">
+                    <motion.div
+                        key={selectedtab ? selectedtab.label : "empty"}
+                        initial={{ y: 10, opacity: 0 }}
+                        animate={{ y: 10, opacity: 1 }}
+                        exit={{ y: -10, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        style={icon}
+                    >
+                        {selectedtab ? selectedtab.icon : "-"}
+                    </motion.div>
+                </AnimatePresence>
+            </main>
+
+            {/* value transform & path drawing */}
+            <h3 className="mt-10 mb-3 text-2xl font-bold flex item-center"><IoIosArrowRoundForward className="text-4xl font-bold" />Value transform & path drawing</h3>
+            <div>
+                <motion.div style={{ ...container3, background }}>
+                    <motion.div
+                        className="icon-container"
+                        style={{ ...box2, x: x1 }}
+                        drag="x"
+                        dragConstraints={{ left: -100, right: 100 }}
+                        dragElastic={0.2}
+                    >
+                        <svg className="progress-icon" viewBox="0 0 50 50">
+                            <motion.path
+                                fill="none"
+                                strokeWidth="2"
+                                stroke={color}
+                                d="M 0, 20 a 20, 20 0 1,0 40,0 a 20, 20 0 1,0 -40,0"
+                                style={{
+                                    x: 5,
+                                    y: 5,
+                                }}
+                            />
+                            <motion.path
+                                id="tick"
+                                fill="none"
+                                strokeWidth="2"
+                                stroke={color}
+                                d="M14,26 L 22,33 L 35,16"
+                                strokeDasharray="1 1"
+                                style={{ pathLength: tickPath }}
+                            />
+                            <motion.path
+                                fill="none"
+                                strokeWidth="2"
+                                stroke={color}
+                                d="M17,17 L33,33"
+                                strokeDasharray="0 1"
+                                style={{ pathLength: crossPathA }}
+                            />
+                            <motion.path
+                                id="cross"
+                                fill="none"
+                                strokeWidth="2"
+                                stroke={color}
+                                d="M33,17 L17,33"
+                                strokeDasharray="0 1"
+                                style={{ pathLength: crossPathB }}
+                            />
+                        </svg>
+                    </motion.div>
+                </motion.div>
+            </div>
+
+            {/* Path morphing */}
+            <h3 className="mt-10 mb-3 text-2xl font-bold flex item-center"><IoIosArrowRoundForward className="text-4xl font-bold" />Path morphing</h3>
+            <svg width="400" height="400">
+                <g transform="translate(10 10) scale(17 17)">
+                    <motion.path fill={fill} d={path} />
+                </g>
+            </svg>
         </div>
     );
 }

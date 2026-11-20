@@ -125,33 +125,33 @@ function Siderbar() {
         setSuggestions([])
     }
 
-    function changeselectedvalue(city) {       
+    function changeselectedvalue(city) {
         console.log("selectcity", city)
-        setSelectedcity(city)                       
-    }                     
-                           
+        setSelectedcity(city)
+    }
+
     console.log("selectedcity", selectedcity)
 
-     // ── Framer Motion variants ──────────────────────────────────────────────
+    // ── Framer Motion variants ──────────────────────────────────────────────
     const fadeUp = {
         hidden: { opacity: 0, y: 28 },
-        show:   { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } }
+        show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } }
     };
     const slideLeft = {
         hidden: { opacity: 0, x: -40 },
-        show:   { opacity: 1, x: 0, transition: { duration: 0.55, ease: 'easeOut' } }
+        show: { opacity: 1, x: 0, transition: { duration: 0.55, ease: 'easeOut' } }
     };
     const slideRight = {
         hidden: { opacity: 0, x: 50 },
-        show:   { opacity: 1, x: 0, transition: { duration: 0.55, ease: 'easeOut' } }
+        show: { opacity: 1, x: 0, transition: { duration: 0.55, ease: 'easeOut' } }
     };
     const scaleIn = {
         hidden: { opacity: 0, scale: 0.65 },
-        show:   { opacity: 1, scale: 1, transition: { duration: 0.6, type: 'spring', stiffness: 130 } }
+        show: { opacity: 1, scale: 1, transition: { duration: 0.6, type: 'spring', stiffness: 130 } }
     };
     const stagger = {
         hidden: {},
-        show:   { transition: { staggerChildren: 0.09 } }
+        show: { transition: { staggerChildren: 0.09 } }
     };
     // ────────────────────────────────────────────────────────────────────────
 
@@ -159,8 +159,18 @@ function Siderbar() {
         <main className="flex flex-col min-[992px]:flex-row min-h-screen h-screen px-3 sm:px-5 min-[992px]:px-6 xl:px-10 pt-4 sm:pt-6 min-[992px]:pt-10 pb-20 min-[992px]:pb-10
          bg-[#0B131E] gap-3 sm:gap-4 min-[992px]:gap-5 xl:gap-10 overflow-hidden min-[992px]:overflow-auto">
             {/* Desktop Sidebar */}
-            <div className="hidden min-[992px]:flex bg-[#202B3B] w-fit h-full p-4 text-white/70 text-center text-lg rounded-3xl flex-col">
-                <nav className="text-center mt-10">
+            <motion.div
+                variants={slideLeft}
+                initial="hidden"
+                animate="show"
+                style={{ zIndex: 9999 }}
+                className="hidden min-[992px]:flex bg-[#202B3B] w-fit h-full p-4 text-white/70 text-center text-lg rounded-3xl flex-col">
+                <motion.nav
+                    variants={slideLeft}
+                    initial="hidden"
+                    animate="show"
+                    style={{ zIndex: 9999 }}
+                    className="text-center mt-10">
                     {
                         menu?.map((v) => {
                             return (
@@ -172,23 +182,23 @@ function Siderbar() {
                                         `flex items-center mt-6 py-3 rounded-xl transition-all justify-center
                                         ${isActive
                                             ? "text-white"
-                                            : "text-white/70"                
-                                        }`                               
-                                    }                           
-                                >                                         
+                                            : "text-white/70"
+                                        }`
+                                    }
+                                >
                                     <div className="text-center">
                                         <div className="w-fit text-2xl mx-auto">
                                             {v.icone}
-                                        </div>                                                                                                     
+                                        </div>
                                         {v.name}
                                     </div>
                                 </NavLink>
                             )
                         })
                     }
-                </nav>
-            </div>
-       
+                </motion.nav>
+            </motion.div>
+
             <section className={`w-full h-full pb-2 ${pageurl.includes("/siderbar/maps") ? "overflow-auto" : "overflow-auto"} custom-scrollbar`}>
                 <form className="relative z-[99999]" ref={searchRef}>
                     <input
@@ -203,7 +213,7 @@ function Siderbar() {
                             text-white bg-[#202B3B] w-full
                             lg:w-[60%] xl:w-[65%] 2xl:w-[70%]
                             px-3 sm:px-4 py-2 sm:py-3 rounded-xl focus:outline-none
-                        `}                 
+                        `}
                         value={search}
                         onFocus={() => setInputFocused(true)}
                         onBlur={() => {
