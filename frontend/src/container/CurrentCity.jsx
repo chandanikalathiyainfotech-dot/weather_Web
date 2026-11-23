@@ -192,9 +192,9 @@ function CurrentCity({ search, onCangeCity, variant, setSearchvalue, changeselec
 
     return (
         <main>
-            <div className="flex flex-col lg:flex-row gap-4 xl:gap-6 2xl:gap-10 w-full">
+            <div className="flex flex-col lg:flex-row gap-4 xl:gap-6 2xl:gap-10 w-full overflow-visible">
                 <motion.div
-                    className="w-full lg:w-[60%] xl:w-[65%] 2xl:w-[70%] text-white"
+                    className="w-full lg:w-[60%] xl:w-[65%] 2xl:w-[70%] text-white overflow-visible"
                     variants={stagger}
                     initial="hidden"
                     animate="show"
@@ -213,12 +213,12 @@ function CurrentCity({ search, onCangeCity, variant, setSearchvalue, changeselec
                         return (
                             <motion.div
                                 variants={fadeUp}
-                                whileHover={{ scale: 1.02, y: -3, transition: { duration: 0.18 } }}
+                                whileHover={{ scale: 1.02, y: -3, x: 12, transition: { duration: 0.18 } }}
                                 whileTap={{ scale: 0.98 }}
                                 key={v.city}
                                 className={`flex px-3 sm:px-5 py-3 rounded-2xl items-center justify-between mt-3 sm:mt-4 cursor-pointer transition-all ${selectCity?.toLowerCase() === v.city?.toLowerCase()
                                     ? 'bg-transparent border-[#0461A5] border-2'
-                                    : 'bg-[#202B3B] hover:bg-[#2a3a52]'
+                                    : 'bg-[#202B3B] hover:bg-[#2a3a52] overflow-visible'
                                     }`}
                                 onClick={() => setvaluefun(v.city)}
                             >
@@ -367,7 +367,7 @@ function CurrentCity({ search, onCangeCity, variant, setSearchvalue, changeselec
                         <p className="uppercase text-white/70 text-xs sm:text-sm">3-days forecast</p>
 
                         <div className="mt-2">
-                            {forecast?.slice(0, 3)?.map((v,index) => {
+                            {forecast?.slice(0, 3)?.map((v, index) => {
                                 let image;
                                 let classname = "daysforcast-icone";
 
@@ -396,7 +396,8 @@ function CurrentCity({ search, onCangeCity, variant, setSearchvalue, changeselec
                                                 {Math.round(variant?.temp === 'Celsius' ? v?.day?.mintemp_c : v?.day?.mintemp_f)}°
                                             </span>
                                             {" / "}
-                                            <span className="text-white font-semibold">
+                             
+                                             <span className="text-white font-semibold">
                                                 {Math.round(variant?.temp === 'Celsius' ? v?.day?.maxtemp_c : v?.day?.maxtemp_f)}°
                                             </span>
                                         </div>

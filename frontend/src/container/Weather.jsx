@@ -390,7 +390,7 @@ function Weather({ search, variant }) {
                         animate="show"
                     >
                         <div className="px-4 sm:px-6 md:px-7 py-6 sm:py-9 bg-[#202B3B] rounded-2xl mt-4 lg:mt-6 sm:mt-10">
-                            <p className="uppercase text-white/70 text-xs sm:text-sm">7-days forecast</p>
+                            <p className="uppercase text-white/70 text-xs sm:text-sm">{forecast?.length}-days forecast</p>
                             <div className="mt-4">
                                 {forecast?.map((v, index) => {
                                     const cond = v?.day?.condition?.text || "";

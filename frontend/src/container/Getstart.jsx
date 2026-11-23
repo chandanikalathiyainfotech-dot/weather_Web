@@ -35,26 +35,26 @@ function Getstart() {
         localStorage.setItem('firstRun', 'false')
         navigate('/siderbar', { state: { searchCity: initialCity }, replace: true })
 
-        ;(async () => {
-            try {
-                const loc = await getLocation()
-                const city = await reverseGeocode(loc.lat, loc.lon)
-                const finalCity = city || 'New York'
-                localStorage.setItem('userLocation', JSON.stringify({ lat: loc.lat, lon: loc.lon, city: finalCity, timestamp: Date.now() }))
-                navigate('/siderbar', { state: { searchCity: finalCity }, replace: true })
-            } catch {
+            ; (async () => {
                 try {
-                    const res = await fetch("https://ipwho.is/")
-                    const data = await res.json()
-                    if (data.success) {
-                        const city = await reverseGeocode(data.latitude, data.longitude)
-                        const finalCity = city || data.city || 'New York'
-                        localStorage.setItem('userLocation', JSON.stringify({ lat: data.latitude, lon: data.longitude, city: finalCity, timestamp: Date.now() }))
-                        navigate('/siderbar', { state: { searchCity: finalCity }, replace: true })
-                    }
-                } catch {}
-            }
-        })()
+                    const loc = await getLocation()
+                    const city = await reverseGeocode(loc.lat, loc.lon)
+                    const finalCity = city || 'New York'
+                    localStorage.setItem('userLocation', JSON.stringify({ lat: loc.lat, lon: loc.lon, city: finalCity, timestamp: Date.now() }))
+                    navigate('/siderbar', { state: { searchCity: finalCity }, replace: true })
+                } catch {
+                    try {
+                        const res = await fetch("https://ipwho.is/")
+                        const data = await res.json()
+                        if (data.success) {
+                            const city = await reverseGeocode(data.latitude, data.longitude)
+                            const finalCity = city || data.city || 'New York'
+                            localStorage.setItem('userLocation', JSON.stringify({ lat: data.latitude, lon: data.longitude, city: finalCity, timestamp: Date.now() }))
+                            navigate('/siderbar', { state: { searchCity: finalCity }, replace: true })
+                        }
+                    } catch { }
+                }
+            })()
     }
 
     function AnimatedUmbrella({ className = "" }) {
@@ -89,8 +89,8 @@ function Getstart() {
                     {Array.from({ length: 8 }, (_, j) => (
                         <span key={j} className="splash-particle" style={{ "--angle": `${j * 45}deg` }} />
                     ))}
-                </div>
-            </div>
+                </div>  
+            </div>               
         )
     }
 
@@ -175,7 +175,6 @@ function Getstart() {
 }
 
 export default Getstart;
- 
 
 
-                                                                                                                                                                                                                                                                                                                                                                        
+

@@ -395,6 +395,44 @@ const colors = [
     "#4ff0b7",
 ]
 
+//element scroll-linked animation
+const left = '0%'
+const right = '100%'
+const leftInset = '20%'
+const rightInset = '80%'
+const transparent = '#0000'
+const opaque = '#000'
+
+function useScrollOverflowMask(scrollXProgress) {
+    const maskImage = useMotionValue(
+        `liner-gradient(90deg,${opaque},${opaque} ${left}, ${opaque} ${rightInset},${transparent})`
+    )
+
+    useMotionValueEvent(scrollXProgress, "change", (value) => {
+        if (value === 0) {
+            animate(
+                maskImage,
+                `liner-gradient(90deg,${opaque},${opaque} ${left},${opaque} ${rightInset},${transparent})`
+            )
+        } else if (value === 1) {
+            animate(
+                maskImage,
+                `liner-gradient(90deg,${transparent},${opaque} ${leftInset}, ${opaque} ${right},${opaque})`
+            )
+        } else if (
+            scrollXProgress.getPrevious() === 0 ||
+            scrollXProgress.getPrevious() === 1
+        ) {
+            animate(
+                maskImage,
+                `liner-gradient(90deg,${transparent}, ${opaque} ${leftInset},${opaque} ${right},${opaque})`
+            )
+        }
+    })
+
+    return maskImage;
+}
+
 //motion component   function
 function Motion({
     strength = 0.5,
@@ -403,6 +441,8 @@ function Motion({
     duration = 0.45,
     basketVelocityFactor = 0.05,
     direction = "cw",
+    anchorX = 0.5,
+    anchorY = 0.5
 } = {}) {
 
     const [state, setState] = useState("locked");
@@ -1069,6 +1109,79 @@ function Motion({
         return () => animation.stop();
     }, [pathIndex, progress]);
 
+    //layout Anchor
+    const [expanded, setExpanded] = useState(false)
+
+    const container4 = {
+        display: "flex",
+        // justifyContent: "center",
+        alignItem: "center",
+        width: "100%",
+        height: "100%"
+    }
+
+    const parent = {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "white",
+        border: "solid 1px black",
+        borderRadius: 20,
+        cursor: "pointer"
+    }
+
+    const child = {
+        position: "relative",
+        width: 70,
+        height: 70,
+        borderRadius: 14,
+        backgroundColor: "hsl(240,50%,55%)",
+        overflow: "visible"
+    }
+
+    const crosshairSize = 20;
+
+    const crosshair = {
+        position: "absolute",
+        width: crosshairSize,
+        height: crosshairSize,
+        marginLeft: -crosshairSize / 2,
+        marginTop: -crosshairSize / 2,
+        pointerEvents: "none"
+    }
+
+    const crosshairH = {
+        position: 'absolute',
+        width: "100%",
+        height: 0,
+        left: 0,
+        top: "50%",
+        borderTop: "1px dashed rgba(255,255,255,0.7)"
+    }
+
+    const crosshairV = {
+        position: "absolute",
+        width: 0,
+        height: "100%",
+        left: "50%",
+        top: 0,
+        borderLeft: "1px dashed rgba(255,255,255,0.7)"
+    }
+
+
+    //element scroll-linked animation
+    const ref = useRef(null)
+    const { scrollXProgress } = useScroll({ container: ref })
+    const maskImage = useScrollOverflowMask(scrollXProgress)
+
+    //move 
+    const box3 = {
+        width: 100,
+        height: 100,
+        background: "#DD00EE",
+        borderRadius: 10
+    }
+
 
     return (
         <div className="mt-20 ml-20">
@@ -1592,7 +1705,6 @@ function Motion({
                 }
             </ul>
 
-
             {/*shared layout animation*/}
             <h3 className="mt-10 mb-3 text-2xl font-bold flex item-center"><IoIosArrowRoundForward className="text-4xl font-bold" />Shared layout animation</h3>
             <div style={conatiner2}>
@@ -1693,12 +1805,91 @@ function Motion({
             </div>
 
             {/* Path morphing */}
-            <h3 className="mt-10 mb-3 text-2xl font-bold flex item-center"><IoIosArrowRoundForward className="text-4xl font-bold" />Path morphing</h3>
+            {/* <h3 className="mt-10 mb-3 text-2xl font-bold flex item-center"><IoIosArrowRoundForward className="text-4xl font-bold" />Path morphing</h3>
             <svg width="400" height="400">
                 <g transform="translate(10 10) scale(17 17)">
                     <motion.path fill={fill} d={path} />
                 </g>
-            </svg>
+            </svg> */}
+
+            {/* layout anchor */}
+            <h3 className="mt-10 mb-3 text-2xl font-bold flex items-center"><IoIosArrowRoundForward className="text-4xl font-bold" />Layout Anchor</h3>
+            <div style={container4}>
+
+                <motion.div
+                    layout
+                    layoutDependency={expanded}
+                    style={{
+                        ...parent,
+                        width: expanded ? 300 : 150,
+                        height: expanded ? 300 : 150
+                    }}
+                    transition={{ duration: 0.8, ease: "easeInOut" }}
+                    onClick={() => setExpanded(!expanded)}
+                >
+                    <motion.div
+                        layout
+                        layoutDependency={expanded}
+                        style={{
+                            ...child,
+                            width: expanded ? 100 : 70,
+                            height: expanded ? 100 : 70
+                        }}
+                        transition={{
+                            duration: 0.8,
+                            ease: "easeInOut",
+                            delay: 0.8
+                        }}
+                    >
+                        <motion.div
+                            layout
+                            layoutDependency={expanded}
+                            style={{
+                                ...crosshair,
+                                left: `${anchorX * 100}%`,
+                                top: `${anchorY * 100}%`
+                            }}
+                            transition={{
+                                duration: 0.8,
+                                ease: "easeInOut",
+                                delay: 0.8
+                            }}
+                        >
+                            <div style={crosshairH}></div>
+                            <div style={crosshairV}></div>
+                        </motion.div>
+                    </motion.div>
+                </motion.div>
+            </div>
+
+            {/* //element scroll-linked animation */}
+            <h3 className="mt-10 mb-3 text-2xl font-bold flex items-center"><IoIosArrowRoundForward className="text-4xl font-bold" />element scroll-linked animation</h3>
+            <div id="example">
+                <svg id="progress" width="80" height="80" viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="30" pathLength="1" className="bg" />
+                    <motion.circle
+                        cx="50"
+                        cy="50"
+                        r="30"
+                        className="indicator"
+                        style={{ pathLength: scrollXProgress }}
+                    />
+                </svg>
+                <motion.ul ref={ref} style={{ maskImage }}>
+                    <li style={{ background: "#FF0088" }}></li>
+                    <li style={{ background: "#DD00EE" }}></li>
+                    <li style={{ background: "#9911FF" }}></li>
+                    <li style={{ background: "#1E75F7" }}></li>
+                    <li style={{ background: "#9A05A8" }}></li>
+                    <li style={{ background: "#8DF0CC" }}></li>
+                </motion.ul>
+                <Stylesheet5 />
+            </div>
+
+            {/* drag */}
+            <h3 className="mt-10 mb-3 text-2xl font-bold flex items-center"><IoIosArrowRoundForward className="text-4xl font-bold" />Drag</h3>
+            <motion.div drag style={box3} />
+
         </div>
     );
 }
@@ -2236,4 +2427,66 @@ function Stylesheet4() {
       }
     `}</style>
     )
+}
+
+function Stylesheet5() {
+    return (
+        <style>{`
+            #example {
+                width: 100%;
+                max-width: 400px;
+                position: relative;
+                margin-top:80px;
+            }
+
+            #example #progress {
+                position: absolute;
+                top: -65px;
+                left: -15px;
+                transform: rotate(-90deg);
+            }
+
+            #example .bg {
+                stroke: #cccccc;
+                stroke-width: 10%;
+                fill: none;
+            }
+
+            #example #progress circle {
+                stroke-dashoffset: 0;
+                stroke-width: 10%;
+                fill: none;
+            }
+
+            #example #progress .indicator {
+                stroke: #FF0088;
+            }
+
+            #example ul {
+                display: flex;
+                list-style: none;
+                height: 220px;
+                overflow-x: scroll;
+                padding: 20px 0;
+                margin: 0 auto;
+                gap: 20px;
+            }
+
+            #example::-webkit-scrollbar,
+            #example ul::-webkit-scrollbar {
+                height: 5px;
+                width: 5px;
+                background: #fff3;
+            }
+
+            #example ul::-webkit-scrollbar-thumb {
+                background: #FF0088;
+                border-radius: 1ex;
+            }
+
+            #example li {
+                flex: 0 0 200px;
+            }
+        `}</style>
+    );
 }

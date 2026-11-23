@@ -269,6 +269,7 @@ function Siderbar() {
                     <Route path='/maps' element={<Map search={selectedcity || city} variant={variant} />} />
                     <Route path='/setting' element={<Setting search={city} onchangevarint={handleChangeVarinet} variant={variant} />} />
                 </Routes>
+                
             </section>
 
             {/* Mobile/Tablet Bottom Menu */}
