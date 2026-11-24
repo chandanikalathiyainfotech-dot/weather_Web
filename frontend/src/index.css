@@ -960,7 +960,7 @@ body,
       /* Line ki motai (thickness) */
       transparent 3px,
       /* Gap shuru hone ki jagah */
-      transparent 15px
+      transparent 15px,
       /* Do lines ke beech ka gap */
     );
 }

@@ -433,6 +433,39 @@ function useScrollOverflowMask(scrollXProgress) {
     return maskImage;
 }
 
+//Animate state
+function Input({
+    value,
+    children,
+    set,
+    min = -200,
+    max = 200
+}) {
+    return (
+        <label>
+            <code>{children}</code>
+
+            <input
+                value={value}
+                type="range"
+                min={min}
+                max={max}
+                onChange={(e) => set(parseFloat(e.target.value))}
+            />
+
+            <input
+                type="number"
+                value={value}
+                min={min}
+                max={max}
+                onChange={(e) => set(parseFloat(e.target.value) || 0)}
+            />
+        </label>
+    );
+}
+
+
+
 //motion component   function
 function Motion({
     strength = 0.5,
@@ -1182,6 +1215,71 @@ function Motion({
         borderRadius: 10
     }
 
+    //drag:constraints
+    const constraintsRef = useRef(null)
+
+    const constraints = {
+        width: 300,
+        height: 300,
+        backgroundColor: '#f5cee5ab',
+        borderRadius: 10
+    }
+
+    const box4 = {
+        width: 100,
+        height: 100,
+        backgroundColor: "#FF0088",
+        borderRadius: 10
+    }
+
+    //scroll horizontal
+    const containerRef1 = useRef(null);
+
+    const {
+        scrollYProgress: galleryScrollProgress
+    } = useScroll({
+        target: containerRef1,
+        offset: ["start start", "end end"]
+    });
+
+    const ITEM_WIDTH = 400;
+    const GAP = 30;
+
+    const items = [
+        { id: 1, color: "red", label: "Night one", image: "/image/i1.png" },
+        { id: 2, color: "green", label: "Night two", image: "/image/i1.png" },
+        { id: 3, color: "blue", label: "Night three", image: "/image/i1.png" },
+        { id: 4, color: "yellow", label: "Night four", image: "/image/i1.png" },
+        { id: 5, color: "pink", label: "Night five", image: "/image/i1.png" }
+    ];
+
+    const totalDistance = (items.length - 1) * (ITEM_WIDTH + GAP);
+
+    const galleryX = useTransform(
+        galleryScrollProgress,
+        [0, 1],
+        [0, -totalDistance]
+    );
+
+    //Animate state
+    const xAni = useMotionValue(0)
+    const yAni = useMotionValue(0)
+    const rotateAni = useMotionValue(0)
+    const [x2, setX2] = useState(0)
+    const [y1, setY1] = useState(0)
+    const [rotate1, setRotate1] = useState(0)
+
+    useEffect(() => {
+        xAni.set(x2)
+    }, [x2])
+
+    useEffect(() => {
+        yAni.set(y1)
+    }, [y1])
+
+    useEffect(() => {
+        rotateAni.set(rotate1)
+    }, [rotate1])
 
     return (
         <div className="mt-20 ml-20">
@@ -1890,15 +1988,93 @@ function Motion({
             <h3 className="mt-10 mb-3 text-2xl font-bold flex items-center"><IoIosArrowRoundForward className="text-4xl font-bold" />Drag</h3>
             <motion.div drag style={box3} />
 
+            {/* drag:constraints */}
+            <h3 className="mt-10 mb-3 text-2xl font-bold flex item-center"><IoIosArrowRoundForward className="text-4xl font-bold" />Drag:Constraints</h3>
+            <motion.div ref={constraintsRef} style={constraints}>
+                <motion.div
+                    drag
+                    dragConstraints={constraintsRef}
+                    dragElastic={0.2}
+                    style={box4}
+                >
+                </motion.div>
+            </motion.div>
+
+            {/* scroll horizontal */}
+            <h3 className="mt-10 mb-3 text-2xl font-bold flex item-center"><IoIosArrowRoundForward className="text-4xl font-bold" />scroll horizontal</h3>
+            <div id="example">
+                <section className="intro-section">
+                    <h1 className="impact">Tokyo Nights</h1>
+                </section>
+
+                <div ref={containerRef1} className="scroll-container">
+                    <div className="sticky-wrapper">
+                        <motion.div
+                            className="gallery"
+                            style={{ x: galleryX }}
+                        >
+                            {items.map((item) => (
+                                <div
+                                    key={item.id}
+                                    className="gallery-item"
+                                    style={{
+                                        "--item-color": item.color,
+                                        "--item-image": `url(${item.image})`
+                                    }}
+                                >
+                                    <div className="item-content">
+                                        <span className="item-number">
+                                            0{item.id}
+                                        </span>
+                                        <h2>{item.label}</h2>
+                                    </div>
+                                </div>
+                            ))}
+                        </motion.div>
+                    </div>
+                </div>
+
+                <section className="outro-section">
+                    <p className="big">Find</p>
+                </section>
+
+                <Stylesheet6 />
+            </div>
+
+            {/* Animate state */}
+            <h3 className="mt-10 mb-3 text-2xl font-bold flex item-center"><IoIosArrowRoundForward className="text-4xl font-bold" />Animate state</h3>
+            <div id="example">
+                <div>
+                    <motion.div
+                        className="box"
+                        style={{ x: xAni, y: yAni, rotate: rotateAni }}
+                        transition={{ type: "spring" }}
+                    />
+                </div>
+                <div className="inputs">
+                    <Input value={x2} set={setX2}>
+                        x
+                    </Input>
+                    <Input value={y1} set={setY1}>
+                        y
+                    </Input>
+                    <Input value={rotate1} set={setRotate1} min={-180} max={180}>
+                        rotate
+                    </Input>
+                </div>
+                <StyleSheet7 />
+            </div>
+
         </div>
     );
+
 }
 
 export default Motion;
 
 function Stylesheet() {
-    return (
-        <style>{`
+        return (
+            <style>{`
       .lp-lock {
         display: flex;
         flex-direction: column;
@@ -1990,12 +2166,12 @@ function Stylesheet() {
         color: #60687a;
       }
     `}</style>
-    )
-}
+        )
+    }
 
-function Stylesheet1() {
-    return (
-        <style>{`
+    function Stylesheet1() {
+        return (
+            <style>{`
       .pr-editor {
         width: min(340px, calc(100vh - 220px));
         padding: 8px;
@@ -2099,12 +2275,12 @@ function Stylesheet1() {
         color: #9aa1ae;
       }
     `}</style>
-    )
-}
+        )
+    }
 
-function Stylesheet2() {
-    return (
-        <style>{`
+    function Stylesheet2() {
+        return (
+            <style>{`
       .pz-viewer {
         width: min(340px, calc((100vh - 120px) * 0.75));
         padding: 8px;
@@ -2200,12 +2376,12 @@ function Stylesheet2() {
         font-variant-numeric: tabular-nums;
       }
     `}</style>
-    )
-}
+        )
+    }
 
-function Stylesheet3() {
-    return (
-        <style>{`
+    function Stylesheet3() {
+        return (
+            <style>{`
       .st-stepper {
         display: flex;
         flex-direction: column;
@@ -2300,12 +2476,12 @@ function Stylesheet3() {
         color: #18222e;
       }
     `}</style>
-    )
-}
+        )
+    }
 
-function Stylesheet4() {
-    return (
-        <style>{`
+    function Stylesheet4() {
+        return (
+            <style>{`
       .dt-post {
         width: min(300px, calc(100vh - 140px));
         padding: 8px;
@@ -2426,12 +2602,12 @@ function Stylesheet4() {
         }
       }
     `}</style>
-    )
-}
+        )
+    }
 
-function Stylesheet5() {
-    return (
-        <style>{`
+    function Stylesheet5() {
+        return (
+            <style>{`
             #example {
                 width: 100%;
                 max-width: 400px;
@@ -2488,5 +2664,220 @@ function Stylesheet5() {
                 flex: 0 0 200px;
             }
         `}</style>
-    );
-}
+        );
+    }
+
+    function Stylesheet6() {
+        return (
+            <style>{`
+            body {
+                overflow-x:hidden;
+            }
+
+            #example {
+                
+                overflow:visible;
+            }
+
+            .intro-section {
+                display:flex;
+                flex-direction:column;
+                justify-content:flex-end;
+                align-item:center;
+                text-align:center; 
+                padding-bottom:40px;
+                color:black;
+            }
+
+            .intro-section h1{
+                font-size:clamp(36px,8vw,72px);
+                color:black;
+                margin:0;
+                text-transform:uppercase;
+            }
+
+             .scroll-container {
+                height: 200vh;
+                position: relative;
+            }
+
+            .sticky-wrapper {
+                position: sticky;
+                top: 0;
+                height: 100vh;
+                width: 400px;
+                margin: 0 auto;
+                display: flex;
+                align-items: center;
+                justify-content: flex-start;
+                overflow: visible;
+            }
+
+            .gallery {
+                display: flex;
+                gap: 30px;
+                will-change: transform;
+            }
+
+            .gallery-item {
+                flex-shrink: 0;
+                width: 400px;
+                height: 500px;
+                border-radius: 12px;
+                position: relative;
+                overflow: hidden;
+                background-image: var(--item-image);
+                background-size: cover;
+                background-position: center;
+            }
+
+            .gallery-item::before {
+                content: "";
+                position: absolute;
+                inset: 0;
+                background: linear-gradient(
+                    to bottom,
+                    transparent 60%,
+                    var(--item-color)
+                );
+                mix-blend-mode: multiply;
+            }
+
+            .item-content {
+                position: absolute;
+                bottom: 30px;
+                left: 30px;
+                z-index: 1;
+            }
+
+            .item-number {
+                font-size: 14px;
+                color: var(--item-color);
+                font-family: "Geist Mono", monospace;
+                display: block;
+                margin-bottom: 8px;
+            }
+
+            .gallery-item h2 {
+                font-size: 28px;
+                font-weight: 600;
+                color: var(--white);
+                margin: 0;
+            }
+
+            .outro-section {
+                height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+
+            @media (max-width: 600px) {
+                .sticky-wrapper {
+                    width: 280px;
+                }
+
+                .gallery {
+                    gap: 15px;
+                }
+
+                .gallery-item {
+                    width: 280px;
+                    height: 350px;
+                }
+            }
+
+            @media (prefers-reduced-motion: reduce) {
+                .gallery {
+                    transform: none !important;
+                }
+                .scroll-container {
+                    height: auto;
+                }
+                .sticky-wrapper {
+                    position: relative;
+                    height: auto;
+                    width: 100%;
+                    overflow-x: auto;
+                    padding: 50px 0;
+                }
+            }
+            
+        `}</style>
+        )
+    }
+
+    function StyleSheet7() {
+        return (
+            <style>{`
+            #example .box {
+                width: 200px;
+                height: 200px;
+                border-radius: 20px;
+                border: 5px dotted black;
+                pointer-events: none;
+            }
+
+            #example {
+                display: flex;
+                align-items: center;
+            }
+
+            #example input {
+                accent-color: black;
+                font-family: "Geist Mono", monospace;
+            }
+
+            #example .inputs {
+                display: flex;
+                flex-direction: column;
+                padding-left: 50px;
+            }
+
+            #example label {
+                display: flex;
+                align-items: center;
+                margin: 10px 0;
+            }
+
+            #example label code {
+                width: 100px;
+            }
+
+            #example input[type="number"] {
+                border: 0;
+                border-bottom: 1px dotted black;
+                color: black;
+                margin-left: 10px;
+            }
+
+            #example input[type="number"]:focus {
+                outline: none;
+                border-bottom: 2px solid var(--hue-1);
+            }
+
+            #example input[type="number"]::-webkit-inner-spin-button {
+                -webkit-appearance: none;
+            }
+
+            input[type='range']::-webkit-slider-runnable-track {
+                height: 10px;
+                -webkit-appearance: none;
+                background: var(--layer);
+                border: 1px solid var(--border);
+                border-radius: 10px;
+                margin-top: -1px;
+            }
+
+            input[type='range']::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                height: 20px;
+                width: 20px;
+                border-radius: 50%;
+                background: var(--hue-1);
+                top: -4px;
+                position: relative;
+            }
+        `}</style>
+        )
+    }
